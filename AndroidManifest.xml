@@ -1,0 +1,29 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.providers.im"
+        android:sharedUserId="android.uid.shared">
+
+    <permission android:name="com.android.providers.im.permission.READ_ONLY"
+        android:permissionGroup="android.permission-group.MESSAGES"
+        android:protectionLevel="dangerous"
+        android:label="@string/ro_perm_label"
+        android:description="@string/ro_perm_desc" />
+
+    <permission android:name="com.android.providers.im.permission.WRITE_ONLY"
+        android:permissionGroup="android.permission-group.MESSAGES"
+        android:protectionLevel="dangerous"
+        android:label="@string/wo_perm_label"
+        android:description="@string/wo_perm_desc" />
+
+    <uses-permission android:name="com.android.providers.im.permission.READ_ONLY" />
+    <uses-permission android:name="com.android.providers.im.permission.WRITE_ONLY" />
+
+    <application android:process="android.process.acore"
+                 android:label="IM Storage"
+                 android:icon="@drawable/ic_launcher_im">
+        <provider android:name="ImProvider" android:authorities="im"
+            android:multiprocess="false"
+            android:readPermission="com.android.providers.im.permission.READ_ONLY"
+            android:writePermission="com.android.providers.im.permission.WRITE_ONLY"
+            android:grantUriPermissions="true" />
+    </application>
+</manifest>

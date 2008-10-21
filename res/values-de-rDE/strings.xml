@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="ro_perm_desc">
+        Ermöglicht einer Anwendung, Daten vom IM-Inhalteanbieter zu lesen.
+    </string>
+  <string name="ro_perm_label">Sofortnachrichten lesen</string>
+  <string name="wo_perm_desc">
+        Ermöglicht einer Anwendung, Daten zum IM-Inhalteanbieter zu schreiben.
+</string>
+  <string name="wo_perm_label">Sofortnachrichten schreiben</string>
+</resources>
