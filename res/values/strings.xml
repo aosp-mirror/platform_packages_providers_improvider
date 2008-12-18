@@ -16,7 +16,7 @@
 ** limitations under the License.
 */
 -->
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ro_perm_label">read instant messages</string>
     <string name="ro_perm_desc">
         Allows applications to read data from the IM content provider.
@@ -26,4 +26,46 @@
     <string name="wo_perm_desc">
         Allows applications to write data to the IM content provider.
     </string>
+
+    <!-- The application label -->
+    <string name="im_label">IM</string>
+
+    <!-- These strings displayed on the landing page. -->
+    <!-- The title of the landing page.-->
+    <string name="landing_page_title">Chat - Select an account</string>
+
+    <!-- Landing page screen menu and context menu items. -->
+    <!-- Conext menu item: add a new account.-->
+    <string name="menu_add_account">Add account</string>
+    <!-- Conext menu item: edit an account.-->
+    <string name="menu_edit_account">Edit account</string>
+    <!-- Conext menu item: remove an account.-->
+    <string name="menu_remove_account">Remove account</string>
+    <!-- Context menu item: sign into service. -->
+    <string name="sign_in">Sign in</string>
+    <!-- Context menu item: sign out the service.-->
+    <string name="menu_sign_out">Sign out</string>
+    <!-- Context menu item: go to the setting page.-->
+    <string name="menu_settings">Settings</string>
+    <!-- Screen menu item: sign out all service.-->
+    <string name="menu_sign_out_all">Sign out all</string>
+
+    <!-- These strings displayed on the landing page. -->
+    <!-- The title of the landing page.-->
+    <string name="choose_account_title">Chat - Select an account</string>
+    <!-- The account label on the landing page e.g. "AIM account:", if there is an account.-->
+    <string name="account_title"><xliff:g id="account">%1$s</xliff:g> account:</string>
+    <!-- Displays if there is only one ongoing chat on the landing page.-->
+    <string name="one_conversation">1 chat</string>
+    <!-- Displays the number of ongoing chats on the landing page.-->
+    <string name="conversations"><xliff:g id="count">%1$d</xliff:g> chats</string>
+    <!-- The add account label on the landing page if there isn't any account.-->
+    <string name="add_account">Add <xliff:g id="account">%1$s</xliff:g> account</string>
+    
+    <!-- Screen menu item: go the contact list screen. May be overrided by the plugin.-->
+    <string name="menu_view_contact_list">Contact list</string>
+
+    <!-- Connection status -->
+    <string name="signing_in_wait">Signing in\u2026</string>
+
 </resources>

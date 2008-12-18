@@ -1,12 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="ro_perm_desc">
-        Ermöglicht einer Anwendung, Daten vom IM-Inhalteanbieter zu lesen.
-    </string>
-  <string name="ro_perm_label">Sofortnachrichten lesen</string>
-  <string name="wo_perm_desc">
-        Ermöglicht einer Anwendung, Daten zum IM-Inhalteanbieter zu schreiben.
-</string>
-  <string name="wo_perm_label">Sofortnachrichten schreiben</string>
+    <string name="ro_perm_label">"Sofortnachrichten lesen"</string>
+    <string name="ro_perm_desc">"Ermöglicht einer Anwendung, Daten vom IM-Inhalteanbieter zu lesen."</string>
+    <string name="wo_perm_label">"Sofortnachrichten schreiben"</string>
+    <string name="wo_perm_desc">"Ermöglicht einer Anwendung, Daten zum IM-Inhalteanbieter zu schreiben."</string>
+    <!-- no translation found for im_label (2383771185743116130) -->
+    <skip />
+    <!-- no translation found for landing_page_title (3308840398526636367) -->
+    <skip />
+    <!-- no translation found for menu_add_account (7882883530162530640) -->
+    <skip />
+    <!-- no translation found for menu_edit_account (5158375995425359089) -->
+    <skip />
+    <!-- no translation found for menu_remove_account (6253792104452023333) -->
+    <skip />
+    <!-- no translation found for sign_in (3583291954308481049) -->
+    <skip />
+    <!-- no translation found for menu_sign_out (1696541713836583492) -->
+    <skip />
+    <!-- no translation found for menu_settings (4358480535175505390) -->
+    <skip />
+    <!-- no translation found for menu_sign_out_all (6694688381587929540) -->
+    <skip />
+    <!-- no translation found for choose_account_title (5360746033151159813) -->
+    <skip />
+    <!-- no translation found for account_title (2948323540348040321) -->
+    <skip />
+    <!-- no translation found for one_conversation (1260066318945302007) -->
+    <skip />
+    <!-- no translation found for conversations (5217709916951150225) -->
+    <skip />
+    <!-- no translation found for add_account (3075763239147529213) -->
+    <skip />
+    <!-- no translation found for menu_view_contact_list (7606776483433251078) -->
+    <skip />
+    <!-- no translation found for signing_in_wait (7601184703940729109) -->
+    <skip />
 </resources>

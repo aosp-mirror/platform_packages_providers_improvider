@@ -20,7 +20,7 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
-import android.content.res.XmlResourceParser;
+import android.content.ContentResolver;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteConstraintException;
@@ -32,12 +32,9 @@ import android.os.ParcelFileDescriptor;
 import android.provider.Im;
 import android.text.TextUtils;
 import android.util.Log;
-import com.android.internal.util.XmlUtils;
 
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -73,9 +70,10 @@ public class ImProvider extends ContentProvider {
     private static final String TABLE_MESSAGES = "messages";
     private static final String TABLE_OUTGOING_RMQ_MESSAGES = "outgoingRmqMessages";
     private static final String TABLE_LAST_RMQ_ID = "lastrmqid";
+    private static final String TABLE_ACCOUNT_STATUS = "accountStatus";
 
     private static final String DATABASE_NAME = "im.db";
-    private static final int DATABASE_VERSION = 44;
+    private static final int DATABASE_VERSION = 45;
 
     protected static final int MATCH_PROVIDERS = 1;
     protected static final int MATCH_PROVIDERS_BY_ID = 2;
@@ -132,6 +130,9 @@ public class ImProvider extends ContentProvider {
     protected static final int MATCH_OUTGOING_RMQ_MESSAGE = 111;
     protected static final int MATCH_OUTGOING_HIGHEST_RMQ_ID = 112;
     protected static final int MATCH_LAST_RMQ_ID = 113;
+    protected static final int MATCH_ACCOUNTS_STATUS = 114;
+    protected static final int MATCH_ACCOUNT_STATUS = 115;
+
 
     protected final UriMatcher mUrlMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     private final String mTransientDbName;
@@ -142,7 +143,10 @@ public class ImProvider extends ContentProvider {
     private static final HashMap<String, String> sBlockedListProjectionMap;
 
     private static final String PROVIDER_JOIN_ACCOUNT_TABLE =
-            "providers LEFT OUTER JOIN accounts ON (providers._id = accounts.provider AND accounts.active = 1)";
+            "providers LEFT OUTER JOIN accounts ON " +
+                    "(providers._id = accounts.provider AND accounts.active = 1) " +
+                    "LEFT OUTER JOIN accountStatus ON (accounts._id = accountStatus.account)";
+
 
     private static final String CONTACT_JOIN_PRESENCE_TABLE =
             "contacts LEFT OUTER JOIN presence ON (contacts._id = presence.contact_id)";
@@ -179,6 +183,14 @@ public class ImProvider extends ContentProvider {
     private final String mDatabaseName;
     private final int mDatabaseVersion;
 
+    private final String[] BACKFILL_PROJECTION = {
+        Im.Chats._ID, Im.Chats.SHORTCUT, Im.Chats.LAST_MESSAGE_DATE
+    };
+
+    private final String[] FIND_SHORTCUT_PROJECTION = {
+        Im.Chats._ID, Im.Chats.SHORTCUT
+    };
+
     private class DatabaseHelper extends SQLiteOpenHelper {
 
         DatabaseHelper(Context context) {
@@ -194,6 +206,7 @@ public class ImProvider extends ContentProvider {
                     "_id INTEGER PRIMARY KEY," +
                     "name TEXT," +       // eg AIM
                     "fullname TEXT," +   // eg AOL Instance Messenger
+                    "category TEXT," +   // a category used for forming intent
                     "signup_url TEXT" +  // web url to visit to create a new account
                     ");");
 
@@ -210,7 +223,7 @@ public class ImProvider extends ContentProvider {
                     "UNIQUE (provider, username)" +
                     ");");
 
-            createContactsTables(db, null);
+            createContactsTables(db);
 
             db.execSQL("CREATE TABLE " + TABLE_AVATARS + " (" +
                     "_id INTEGER PRIMARY KEY," +
@@ -229,7 +242,6 @@ public class ImProvider extends ContentProvider {
                     "value TEXT," +
                     "UNIQUE (provider, name)" +
                     ");");
-            loadProviderSettings(db);
 
             db.execSQL("create TABLE " + TABLE_OUTGOING_RMQ_MESSAGES + " (" +
                     "_id INTEGER PRIMARY KEY," +
@@ -260,62 +272,46 @@ public class ImProvider extends ContentProvider {
                     "END");
         }
 
-        /**
-         * Load settings of providers from the initial configuration file. Should only
-         * be done once, as the table of providerSettings is a persistent table.
-         *
-         * NOTE: This method must be called after table provider and table providerSettings
-         * have been created.
-         * @param db
-         */
-        private void loadProviderSettings(SQLiteDatabase db) {
-            XmlResourceParser parser = getContext().getResources()
-                    .getXml(R.xml.im_service_providers);
-
-            try {
-                XmlUtils.beginDocument(parser, "im_providers");
-
-                while (true) {
-                    XmlUtils.nextElement(parser);
-                    String tag = parser.getName();
-                    if (!"provider".equals(tag)) {
-                        break;
-                    }
-
-                    int numAttrs = parser.getAttributeCount();
-
-                    HashMap<String, String> prefs = new HashMap<String, String>();
-                    for (int i = 0; i < numAttrs; i++) {
-                        String attrName = parser.getAttributeName(i);
-                        String value = parser.getAttributeValue(i);
-
-                        prefs.put(attrName, value);
-                    }
-
-                    String name = prefs.get("name");
-                    String fullname = prefs.get("full_name");
-                    String signup_url = prefs.get("signup_url");
-
-                    // insert to table provider
-                    ContentValues values = new ContentValues();
-                    values.put(Im.Provider.NAME, name);
-                    values.put(Im.Provider.FULLNAME, fullname);
-                    values.put(Im.Provider.SIGNUP_URL, signup_url);
-
-                    db.insert(TABLE_PROVIDERS, "name", values);
-                }
-            } catch (XmlPullParserException e) {
-            } catch (IOException e) {
-            } finally {
-                parser.close();
-            }
-        }
-
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w(LOG_TAG, "Upgrading database from version " + oldVersion +
-                    " to " + newVersion + ", which will destroy all old data");
+            Log.d(LOG_TAG, "Upgrading database from version " + oldVersion + " to " + newVersion);
 
+            switch (oldVersion) {
+                case 43:    // this is the db version shipped in Dream 1.0
+                    // no-op: no schema changed from 43 to 44. The db version was changed to flush
+                    // old provider settings, so new provider setting (including new name/value
+                    // pairs) could be inserted by the plugins. 
+
+                    // follow thru.
+                case 44:
+                    if (newVersion <= 44) {
+                        return;
+                    }
+
+                    db.beginTransaction();
+                    try {
+                        // add category column to the providers table
+                        db.execSQL("ALTER TABLE " + TABLE_PROVIDERS + " ADD COLUMN category TEXT;");
+                        // add otr column to the contacts table
+                        db.execSQL("ALTER TABLE " + TABLE_CONTACTS + " ADD COLUMN otr INTEGER;");
+
+                        db.setTransactionSuccessful();
+                    } catch (Throwable ex) {
+                        Log.e(LOG_TAG, ex.getMessage(), ex);
+                        break; // force to destroy all old data;
+                    } finally {
+                        db.endTransaction();
+                    }
+
+                    return;
+            }
+
+            Log.w(LOG_TAG, "Couldn't upgrade db to " + newVersion + ". Destroying old data.");
+            destroyOldTables(db);
+            onCreate(db);
+        }
+
+        private void destroyOldTables(SQLiteDatabase db) {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROVIDERS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_ACCOUNTS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTACT_LIST);
@@ -325,19 +321,11 @@ public class ImProvider extends ContentProvider {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROVIDER_SETTINGS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_OUTGOING_RMQ_MESSAGES);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_LAST_RMQ_ID);
-
-            onCreate(db);
         }
 
-        private void createContactsTables(SQLiteDatabase db, String tablePrefix) {
+        private void createContactsTables(SQLiteDatabase db) {
             StringBuilder buf = new StringBuilder();
-            String contactsTableName;
-
-            if (tablePrefix != null) {
-                contactsTableName = tablePrefix + TABLE_CONTACTS;
-            } else {
-                contactsTableName = TABLE_CONTACTS;
-            }
+            String contactsTableName = TABLE_CONTACTS;
 
             // creating the "contacts" table
             buf.append("CREATE TABLE IF NOT EXISTS ");
@@ -360,7 +348,10 @@ public class ImProvider extends ContentProvider {
             // qc: quick contact (derived from message count)
             // rejected: if the contact has ever been rejected by the user
             buf.append("qc INTEGER,");
-            buf.append("rejected INTEGER");
+            buf.append("rejected INTEGER,");
+
+            // Off the record status
+            buf.append("otr INTEGER");
 
             buf.append(");");
 
@@ -370,9 +361,6 @@ public class ImProvider extends ContentProvider {
 
             // creating contact etag table
             buf.append("CREATE TABLE IF NOT EXISTS ");
-            if (tablePrefix != null) {
-                buf.append(tablePrefix);
-            }
             buf.append(TABLE_CONTACTS_ETAG);
             buf.append(" (");
             buf.append("_id INTEGER PRIMARY KEY,");
@@ -386,9 +374,6 @@ public class ImProvider extends ContentProvider {
 
             // creating the "contactList" table
             buf.append("CREATE TABLE IF NOT EXISTS ");
-            if (tablePrefix != null) {
-                buf.append(tablePrefix);
-            }
             buf.append(TABLE_CONTACT_LIST);
             buf.append(" (");
             buf.append("_id INTEGER PRIMARY KEY,");
@@ -403,9 +388,6 @@ public class ImProvider extends ContentProvider {
 
             // creating the "blockedList" table
             buf.append("CREATE TABLE IF NOT EXISTS ");
-            if (tablePrefix != null) {
-                buf.append(tablePrefix);
-            }
             buf.append(TABLE_BLOCKED_LIST);
             buf.append(" (");
             buf.append("_id INTEGER PRIMARY KEY,");
@@ -500,20 +482,21 @@ public class ImProvider extends ContentProvider {
                     "groupchat INTEGER," +   // 1 if group chat, 0 if not TODO: remove this column
                     "last_unread_message TEXT," +  // the last unread message
                     "last_message_date INTEGER," +  // in seconds
-                    "unsent_composed_message TEXT" + // a composed, but not sent message
-
+                    "unsent_composed_message TEXT," + // a composed, but not sent message
+                    "shortcut INTEGER" + // which of 10 slots (if any) this chat occupies
                     ");");
+
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + cpDbName + TABLE_ACCOUNT_STATUS + " (" +
+                    "_id INTEGER PRIMARY KEY," +
+                    "account INTEGER UNIQUE," +
+                    "presenceStatus INTEGER," +
+                    "connStatus INTEGER" +
+                    ");"
+            );
 
             /* when we moved the contact table out of transient_db and into the main db, the
                contact_cleanup and group_cleanup triggers don't work anymore. It seems we can't
                create triggers that reference objects in a different database!
-
-            // creates in-memory contacts tables. Because we need to download the
-            // contacts after each login, there is no need to store them in
-            // persistent storage. When the client server protocol supports the
-            // client storing contacts offline, we can move these tables to
-            // persistent storage
-            createContactsTables(db, cpDbName);
 
             String contactsTableName = TABLE_CONTACTS;
 
@@ -568,12 +551,20 @@ public class ImProvider extends ContentProvider {
                 "providers.name AS name");
         sProviderAccountsProjectionMap.put(Im.Provider.FULLNAME,
                 "providers.fullname AS fullname");
+        sProviderAccountsProjectionMap.put(Im.Provider.CATEGORY,
+                "providers.category AS category");
         sProviderAccountsProjectionMap.put(Im.Provider.ACTIVE_ACCOUNT_ID,
                 "accounts._id AS account_id");
         sProviderAccountsProjectionMap.put(Im.Provider.ACTIVE_ACCOUNT_USERNAME,
                 "accounts.username AS account_username");
         sProviderAccountsProjectionMap.put(Im.Provider.ACTIVE_ACCOUNT_PW,
                 "accounts.pw AS account_pw");
+        sProviderAccountsProjectionMap.put(Im.Provider.ACTIVE_ACCOUNT_LOCKED,
+                "accounts.locked AS account_locked");
+        sProviderAccountsProjectionMap.put(Im.Provider.ACCOUNT_PRESENCE_STATUS,
+                "accountStatus.presenceStatus AS account_presenceStatus");
+        sProviderAccountsProjectionMap.put(Im.Provider.ACCOUNT_CONNECTION_STATUS,
+                "accountStatus.connStatus AS account_connStatus");
 
         // contacts projection map
         sContactsProjectionMap = new HashMap<String, String>();
@@ -583,6 +574,7 @@ public class ImProvider extends ContentProvider {
         sContactsProjectionMap.put(Im.Contacts._COUNT, "COUNT(*) AS _count");
 
         // contacts column
+        sContactsProjectionMap.put(Im.Contacts._ID, "contacts._id as _id");
         sContactsProjectionMap.put(Im.Contacts.USERNAME, "contacts.username as username");
         sContactsProjectionMap.put(Im.Contacts.NICKNAME, "contacts.nickname as nickname");
         sContactsProjectionMap.put(Im.Contacts.PROVIDER, "contacts.provider as provider");
@@ -619,6 +611,7 @@ public class ImProvider extends ContentProvider {
                 "chats.last_message_date AS last_message_date");
         sContactsProjectionMap.put(Im.Contacts.UNSENT_COMPOSED_MESSAGE,
                 "chats.unsent_composed_message AS unsent_composed_message");
+        sContactsProjectionMap.put(Im.Contacts.SHORTCUT, "chats.SHORTCUT AS shortcut");
 
         // Avatars columns
         sContactsProjectionMap.put(Im.Contacts.AVATAR_HASH, "avatars.hash AS avatars_hash");
@@ -724,6 +717,9 @@ public class ImProvider extends ContentProvider {
         mUrlMatcher.addURI(authority, "outgoingRmqMessages/#", MATCH_OUTGOING_RMQ_MESSAGE);
         mUrlMatcher.addURI(authority, "outgoingHighestRmqId", MATCH_OUTGOING_HIGHEST_RMQ_ID);
         mUrlMatcher.addURI(authority, "lastRmqId", MATCH_LAST_RMQ_ID);
+
+        mUrlMatcher.addURI(authority, "accountStatus", MATCH_ACCOUNTS_STATUS);
+        mUrlMatcher.addURI(authority, "accountStatus/#", MATCH_ACCOUNT_STATUS);
     }
 
     @Override
@@ -736,7 +732,7 @@ public class ImProvider extends ContentProvider {
     public final int update(final Uri url, final ContentValues values,
             final String selection, final String[] selectionArgs) {
 
-        int result;
+        int result = 0;
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
@@ -1061,6 +1057,16 @@ public class ImProvider extends ContentProvider {
                 limit = "1";
                 break;
 
+            case MATCH_ACCOUNTS_STATUS:
+                qb.setTables(TABLE_ACCOUNT_STATUS);
+                break;
+
+            case MATCH_ACCOUNT_STATUS:
+                qb.setTables(TABLE_ACCOUNT_STATUS);
+                appendWhere(whereClause, Im.AccountStatus.ACCOUNT, "=",
+                        url.getPathSegments().get(1));
+                break;
+
             default:
                 throw new IllegalArgumentException("Unknown URL " + url);
         }
@@ -1111,6 +1117,9 @@ public class ImProvider extends ContentProvider {
             case MATCH_PROVIDERS:
                 return Im.Provider.CONTENT_TYPE;
 
+            case MATCH_PROVIDERS_BY_ID:
+                return Im.Provider.CONTENT_ITEM_TYPE;
+            
             case MATCH_ACCOUNTS:
                 return Im.Account.CONTENT_TYPE;
 
@@ -1190,6 +1199,12 @@ public class ImProvider extends ContentProvider {
 
             case MATCH_PROVIDER_SETTINGS:
                 return Im.ProviderSettings.CONTENT_TYPE;
+
+            case MATCH_ACCOUNTS_STATUS:
+                return Im.AccountStatus.CONTENT_TYPE;
+
+            case MATCH_ACCOUNT_STATUS:
+                return Im.AccountStatus.CONTENT_ITEM_TYPE;
 
             default:
                 throw new IllegalArgumentException("Unknown URL");
@@ -1630,6 +1645,7 @@ public class ImProvider extends ContentProvider {
         boolean notifyContactContentUri = false;
         boolean notifyMessagesContentUri = false;
         boolean notifyGroupMessagesContentUri = false;
+        boolean notifyProviderAccountContentUri = false;
 
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         int match = mUrlMatcher.match(url);
@@ -1642,6 +1658,7 @@ public class ImProvider extends ContentProvider {
                 if (rowID > 0) {
                     resultUri = Uri.parse(Im.Provider.CONTENT_URI + "/" + rowID);
                 }
+                notifyProviderAccountContentUri = true;
                 break;
 
             case MATCH_ACCOUNTS:
@@ -1650,6 +1667,7 @@ public class ImProvider extends ContentProvider {
                 if (rowID > 0) {
                     resultUri = Uri.parse(Im.Account.CONTENT_URI + "/" + rowID);
                 }
+                notifyProviderAccountContentUri = true;
                 break;
 
             case MATCH_CONTACTS_BY_PROVIDER:
@@ -1773,9 +1791,11 @@ public class ImProvider extends ContentProvider {
                 // fall through
             case MATCH_CHATS:
                 // Insert into the chats table
+                initialValues.put(Im.Chats.SHORTCUT, -1);
                 rowID = db.replace(TABLE_CHATS, Im.Chats.CONTACT_ID, initialValues);
                 if (rowID > 0) {
                     resultUri = Uri.parse(Im.Chats.CONTENT_URI + "/" + rowID);
+                    addToQuickSwitch(rowID);
                 }
                 notifyContactContentUri = true;
                 break;
@@ -1829,28 +1849,44 @@ public class ImProvider extends ContentProvider {
                 }
                 break;
 
+            case MATCH_ACCOUNTS_STATUS:
+                rowID = db.replace(TABLE_ACCOUNT_STATUS, null, initialValues);
+                if (rowID > 0) {
+                    resultUri = Uri.parse(Im.AccountStatus.CONTENT_URI + "/" + rowID);
+                }
+                notifyProviderAccountContentUri = true;
+                break;
+
             default:
                 throw new UnsupportedOperationException("Cannot insert into URL: " + url);
         }
         // TODO: notify the data change observer?
 
         if (resultUri != null) {
+            ContentResolver resolver = getContext().getContentResolver();
+
             // In most case, we query contacts with presence and chats joined, thus
             // we should also notify that contacts changes when presence or chats changed.
             if (notifyContactContentUri) {
-                getContext().getContentResolver().notifyChange(Im.Contacts.CONTENT_URI, null);
+                resolver.notifyChange(Im.Contacts.CONTENT_URI, null);
             }
 
             if (notifyContactListContentUri) {
-                getContext().getContentResolver().notifyChange(Im.ContactList.CONTENT_URI, null);
+                resolver.notifyChange(Im.ContactList.CONTENT_URI, null);
             }
 
             if (notifyMessagesContentUri) {
-                getContext().getContentResolver().notifyChange(Im.Messages.CONTENT_URI, null);
+                resolver.notifyChange(Im.Messages.CONTENT_URI, null);
             }
 
             if (notifyGroupMessagesContentUri) {
-                getContext().getContentResolver().notifyChange(Im.GroupMessages.CONTENT_URI, null);
+                resolver.notifyChange(Im.GroupMessages.CONTENT_URI, null);
+            }
+
+            if (notifyProviderAccountContentUri) {
+                if (DBG) log("notify insert for " + Im.Provider.CONTENT_URI_WITH_ACCOUNT);
+                resolver.notifyChange(Im.Provider.CONTENT_URI_WITH_ACCOUNT,
+                        null);
             }
         }
         return resultUri;
@@ -1865,6 +1901,105 @@ public class ImProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Cannot override the value for " + columns[i]);
             }
             values.put(columns[i], decodeURLSegment(url.getPathSegments().get(i + 1)));
+        }
+    }
+
+    //  Quick-switch management
+    //  The chat UI provides slots (0, 9, .., 1) for the first 10 chats.  This allows you to
+    //  quickly switch between these chats by chording menu+#.  We number from the right end of
+    //  the number row and move leftward to make an easier two-hand chord with the menu button
+    //  on the left side of the keyboard.
+    private void addToQuickSwitch(long newRow) {
+        //  Since there are fewer than 10, there must be an empty slot.  Let's find it.
+        int slot = findEmptyQuickSwitchSlot();
+
+        if (slot == -1) {
+            return;
+        }
+
+        updateSlotForChat(newRow, slot);
+    }
+
+    //  If there are more than 10 chats and one with a quick switch slot ends then pick a chat
+    //  that doesn't have a slot and have it inhabit the newly emptied slot.
+    private void backfillQuickSwitchSlots() {
+        //  Find all the chats without a quick switch slot, and order
+        Cursor c = query(Im.Chats.CONTENT_URI,
+            BACKFILL_PROJECTION,
+            Im.Chats.SHORTCUT + "=-1", null, Im.Chats.LAST_MESSAGE_DATE + "DESC");
+
+        try {
+            if (c.getCount() < 1) {
+                return;
+            }
+        
+            int slot = findEmptyQuickSwitchSlot();
+        
+            if (slot != -1) {
+                c.moveToFirst();
+            
+                long id = c.getLong(c.getColumnIndex(Im.Chats._ID));
+            
+                updateSlotForChat(id, slot);
+            }
+        } finally {
+            c.close();
+        }
+    }
+
+    private int updateSlotForChat(long chatId, int slot) {
+        ContentValues values = new ContentValues();
+        
+        values.put(Im.Chats.SHORTCUT, slot);
+        
+        return update(Im.Chats.CONTENT_URI, values, Im.Chats._ID + "=?",
+            new String[] { Long.toString(chatId) });
+    }
+
+    private int findEmptyQuickSwitchSlot() {
+        Cursor c = queryInternal(Im.Chats.CONTENT_URI, FIND_SHORTCUT_PROJECTION, null, null, null);
+        final int N = c.getCount();
+
+        try {
+            //  If there are 10 or more chats then all the quick switch slots are already filled
+            if (N >= 10) {
+                return -1;
+            }
+
+            int slots = 0;
+            int column = c.getColumnIndex(Im.Chats.SHORTCUT);
+            
+            //  The map is here because numbers go from 0-9, but we want to assign slots in
+            //  0, 9, 8, ..., 1 order to match the right-to-left reading of the number row
+            //  on the keyboard.
+            int[] map = new int[] { 0, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+
+            //  Mark all the slots that are in use
+            //  The shortcuts represent actual keyboard number row keys, and not ordinals.
+            //  So 7 would mean the shortcut is the 7 key on the keyboard and NOT the 7th
+            //  shortcut.  The passing of slot through map[] below maps these keyboard key
+            //  shortcuts into an ordinal bit position in the 'slots' bitfield.
+            for (c.moveToFirst(); ! c.isAfterLast(); c.moveToNext()) {
+                int slot = c.getInt(column);
+                
+                if (slot != -1) {
+                    slots |= (1 << map[slot]);
+                }
+            }
+
+            //  Try to find an empty one
+            //  As we exit this, the push of i through map[] maps the ordinal bit position
+            //  in the 'slots' bitfield onto a key on the number row of the device keyboard.
+            //  The keyboard key is what is used to designate the shortcut.
+            for (int i = 0; i < 10; i++) {
+                if ((slots & (1 << i)) == 0) {
+                    return map[i];
+                }
+            }
+            
+            return -1;
+        } finally {
+            c.close();
         }
     }
 
@@ -1936,14 +2071,18 @@ public class ImProvider extends ContentProvider {
         boolean notifyMessagesContentUri = false;
         boolean notifyGroupMessagesContentUri = false;
         boolean notifyContactListContentUri = false;
+        boolean notifyProviderAccountContentUri = false;
         int match = mUrlMatcher.match(url);
 
         boolean contactDeleted = false;
         long deletedContactId = 0;
 
+        boolean backfillQuickSwitchSlots = false;
+        
         switch (match) {
             case MATCH_PROVIDERS:
                 tableToChange = TABLE_PROVIDERS;
+                notifyProviderAccountContentUri = true;
                 break;
 
             case MATCH_ACCOUNTS_BY_ID:
@@ -1951,6 +2090,15 @@ public class ImProvider extends ContentProvider {
                 // fall through
             case MATCH_ACCOUNTS:
                 tableToChange = TABLE_ACCOUNTS;
+                notifyProviderAccountContentUri = true;
+                break;
+
+            case MATCH_ACCOUNT_STATUS:
+                changedItemId = url.getPathSegments().get(1);
+                // fall through
+            case MATCH_ACCOUNTS_STATUS:
+                tableToChange = TABLE_ACCOUNT_STATUS;
+                notifyProviderAccountContentUri = true;
                 break;
 
             case MATCH_CONTACTS:
@@ -2080,6 +2228,7 @@ public class ImProvider extends ContentProvider {
 
             case MATCH_CHATS:
                 tableToChange = TABLE_CHATS;
+                backfillQuickSwitchSlots = true;
                 break;
 
             case MATCH_CHATS_BY_ACCOUNT:
@@ -2208,6 +2357,14 @@ public class ImProvider extends ContentProvider {
                 getContext().getContentResolver().notifyChange(Im.GroupMessages.CONTENT_URI, null);
             } else if (notifyContactListContentUri) {
                 getContext().getContentResolver().notifyChange(Im.ContactList.CONTENT_URI, null);
+            } else if (notifyProviderAccountContentUri) {
+                if (DBG) log("notify delete for " + Im.Provider.CONTENT_URI_WITH_ACCOUNT);
+                getContext().getContentResolver().notifyChange(Im.Provider.CONTENT_URI_WITH_ACCOUNT,
+                        null);
+            }
+            
+            if (backfillQuickSwitchSlots) {
+                backfillQuickSwitchSlots();
             }
         }
 
@@ -2229,14 +2386,31 @@ public class ImProvider extends ContentProvider {
         boolean notifyMessagesContentUri = false;
         boolean notifyGroupMessagesContentUri = false;
         boolean notifyContactListContentUri = false;
+        boolean notifyProviderAccountContentUri = false;
 
         int match = mUrlMatcher.match(url);
         switch (match) {
+            case MATCH_PROVIDERS_BY_ID:
+                changedItemId = url.getPathSegments().get(1);
+                // fall through
+            case MATCH_PROVIDERS:
+                tableToChange = TABLE_PROVIDERS;
+                break;
+
             case MATCH_ACCOUNTS_BY_ID:
                 changedItemId = url.getPathSegments().get(1);
                 // fall through
             case MATCH_ACCOUNTS:
                 tableToChange = TABLE_ACCOUNTS;
+                notifyProviderAccountContentUri = true;
+                break;
+
+            case MATCH_ACCOUNT_STATUS:
+                changedItemId = url.getPathSegments().get(1);
+                // fall through
+            case MATCH_ACCOUNTS_STATUS:
+                tableToChange = TABLE_ACCOUNT_STATUS;
+                notifyProviderAccountContentUri = true;
                 break;
 
             case MATCH_CONTACTS:
@@ -2420,12 +2594,16 @@ public class ImProvider extends ContentProvider {
                     || match == MATCH_CONTACTS_BAREBONE) {
                 getContext().getContentResolver().notifyChange(Im.Contacts.CONTENT_URI, null);
             } else if (notifyMessagesContentUri) {
-                log("notify change for " + Im.Messages.CONTENT_URI);
+                if (DBG) log("notify change for " + Im.Messages.CONTENT_URI);
                 getContext().getContentResolver().notifyChange(Im.Messages.CONTENT_URI, null);
             } else if (notifyGroupMessagesContentUri) {
                 getContext().getContentResolver().notifyChange(Im.GroupMessages.CONTENT_URI, null);
             } else if (notifyContactListContentUri) {
                 getContext().getContentResolver().notifyChange(Im.ContactList.CONTENT_URI, null);
+            } else if (notifyProviderAccountContentUri) {
+                if (DBG) log("notify change for " + Im.Provider.CONTENT_URI_WITH_ACCOUNT);
+                getContext().getContentResolver().notifyChange(Im.Provider.CONTENT_URI_WITH_ACCOUNT,
+                        null);
             }
         }
 
