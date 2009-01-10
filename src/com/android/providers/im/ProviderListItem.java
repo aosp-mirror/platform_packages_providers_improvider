@@ -87,7 +87,7 @@ public class ProviderListItem extends LinearLayout {
 
         if (!cursor.isNull(mActiveAccountIdColumn)) {
             line1.setVisibility(View.VISIBLE);
-            line1.setText(r.getString(R.string.account_title, providerDisplayName));
+            line1.setText(providerDisplayName);
             line2.setText(cursor.getString(mActiveAccountUserNameColumn));
 
             long accountId = cursor.getLong(mActiveAccountIdColumn);
