@@ -1446,11 +1446,6 @@ public class ImProvider extends ContentProvider {
 
         mQueryContactPresenceSelectionArgs[0] = String.valueOf(account);
 
-        if (DBG) {
-            log("seedInitialPresence: contacts_with_no_presence_selection => " +
-                    CONTACTS_WITH_NO_PRESENCE_SELECTION);
-        }
-
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
 
@@ -1461,14 +1456,30 @@ public class ImProvider extends ContentProvider {
             presenceValues.put(Im.Presence.PRESENCE_STATUS, Im.Presence.OFFLINE);
             presenceValues.put(Im.Presence.PRESENCE_CUSTOM_STATUS, "");
 
-            // First: update all the presence so they are offline
-            //
-            // TODO: this doesn't take into the accountId. It's ok for GTalk account for now
-            // as we only support one account. However, for multiple account this will be a problem.
-            int count = db.update(TABLE_PRESENCE, presenceValues, null, null);
+            // First: update all the presence for the account so they are offline
+            StringBuilder buf = new StringBuilder();
+            buf.append(Im.Presence.CONTACT_ID);
+            buf.append(" in (select ");
+            buf.append(Im.Contacts._ID);
+            buf.append(" from ");
+            buf.append(TABLE_CONTACTS);
+            buf.append(" where ");
+            buf.append(Im.Contacts.ACCOUNT);
+            buf.append("=?) ");
+
+            String selection = buf.toString();
+            if (DBG) log("seedInitialPresence: reset presence selection=" + selection);
+
+            int count = db.update(TABLE_PRESENCE, presenceValues, selection,
+                    mQueryContactPresenceSelectionArgs);
             if (DBG) log("seedInitialPresence: reset " + count + " presence rows to OFFLINE");
 
             // second: add a presence row for each contact that doesn't have a presence
+            if (DBG) {
+                log("seedInitialPresence: contacts_with_no_presence_selection => " +
+                        CONTACTS_WITH_NO_PRESENCE_SELECTION);
+            }
+
             c = qb.query(db,
                     CONTACT_ID_PROJECTION,
                     CONTACTS_WITH_NO_PRESENCE_SELECTION,
@@ -1926,7 +1937,7 @@ public class ImProvider extends ContentProvider {
         //  Find all the chats without a quick switch slot, and order
         Cursor c = query(Im.Chats.CONTENT_URI,
             BACKFILL_PROJECTION,
-            Im.Chats.SHORTCUT + "=-1", null, Im.Chats.LAST_MESSAGE_DATE + "DESC");
+            Im.Chats.SHORTCUT + "=-1", null, Im.Chats.LAST_MESSAGE_DATE + " DESC");
 
         try {
             if (c.getCount() < 1) {

@@ -137,7 +137,7 @@ public class LandingPage extends ListActivity implements View.OnCreateContextMen
         setTitle(R.string.landing_page_title);
 
         if (!loadPlugins()) {
-            Log.e(TAG, "load plugin failed, no plugin found!");
+            Log.e(TAG, "[onCreate] load plugin failed, no plugin found!");
             finish();
             return;
         }
@@ -166,7 +166,16 @@ public class LandingPage extends ListActivity implements View.OnCreateContextMen
         super.onRestart();
 
         // refresh the accountToPlugin map after mProviderCursor is requeried
-        rebuildAccountToPluginMap();
+        if (!rebuildAccountToPluginMap()) {
+            Log.w(TAG, "[onRestart] rebuiltAccountToPluginMap failed, reload plugins...");
+            
+            if (!loadPlugins()) {
+                Log.e(TAG, "[onRestart] load plugin failed, no plugin found!");
+                finish();
+                return;
+            }
+            rebuildAccountToPluginMap();
+        }
 
         startPlugins();
     }
@@ -340,7 +349,7 @@ public class LandingPage extends ListActivity implements View.OnCreateContextMen
         return res == null ? mDefaultBrandingResources : res;
     }
 
-    private void rebuildAccountToPluginMap() {
+    private boolean rebuildAccountToPluginMap() {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             log("rebuildAccountToPluginMap");
         }
@@ -352,6 +361,9 @@ public class LandingPage extends ListActivity implements View.OnCreateContextMen
         mAccountToPluginMap = new HashMap<Long, PluginInfo>();
 
         mProviderCursor.moveToFirst();
+
+        boolean retVal = true;
+
         do {
             long accountId = mProviderCursor.getLong(ACTIVE_ACCOUNT_ID_COLUMN);
 
@@ -368,8 +380,11 @@ public class LandingPage extends ListActivity implements View.OnCreateContextMen
                 mAccountToPluginMap.put(accountId, pluginInfo);
             } else {
                 Log.w(TAG, "[LandingPage] no plugin found for " + name);
+                retVal = false;
             }
         } while (mProviderCursor.moveToNext()) ;
+
+        return retVal;
     }
 
     private void signIn(long accountId) {
@@ -497,7 +512,7 @@ public class LandingPage extends ListActivity implements View.OnCreateContextMen
         boolean isLoggedIn = isSignedIn(providerCursor);
 
         if (!isLoggedIn) {
-            menu.add(0, ID_SIGN_IN, 0, R.string.sign_in).setIcon(R.drawable.ic_menu_login);
+            menu.add(0, ID_SIGN_IN, 0, R.string.sign_in).setIcon(android.R.drawable.ic_menu_login);
         } else {
             BrandingResources brandingRes = getBrandingResource(providerId);
             menu.add(0, ID_VIEW_CONTACT_LIST, 0,
