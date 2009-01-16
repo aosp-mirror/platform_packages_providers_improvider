@@ -16,6 +16,7 @@
 
 package com.android.providers.im;
 
+import android.graphics.drawable.Drawable;
 import android.widget.LinearLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -36,9 +37,12 @@ public class ProviderListItem extends LinearLayout {
     private LandingPage mActivity;
     private ImageView mProviderIcon;
     private ImageView mStatusIcon;
-    private TextView mLine1;
-    private TextView mLine2;
+    private TextView mProviderName;
+    private TextView mLoginName;
     private TextView mChatView;
+    private View mUnderBubble;
+    private Drawable mBubbleDrawable, mDefaultBackground;
+    
     private int mProviderIdColumn;
     private int mProviderFullnameColumn;
     private int mActiveAccountIdColumn;
@@ -54,10 +58,13 @@ public class ProviderListItem extends LinearLayout {
     public void init(Cursor c) {
         mProviderIcon = (ImageView) findViewById(R.id.providerIcon);
         mStatusIcon = (ImageView) findViewById(R.id.statusIcon);
-        mLine1 = (TextView) findViewById(R.id.line1);
-        mLine2 = (TextView) findViewById(R.id.line2);
+        mProviderName = (TextView) findViewById(R.id.providerName);
+        mLoginName = (TextView) findViewById(R.id.loginName);
         mChatView = (TextView) findViewById(R.id.conversations);
-
+        mUnderBubble = (View) findViewById(R.id.underBubble);
+        mBubbleDrawable = getResources().getDrawable(R.drawable.bubble);
+        mDefaultBackground = getResources().getDrawable(R.drawable.default_background);
+        
         mProviderIdColumn = c.getColumnIndexOrThrow(Im.Provider._ID);
         mProviderFullnameColumn = c.getColumnIndexOrThrow(Im.Provider.FULLNAME);
         mActiveAccountIdColumn = c.getColumnIndexOrThrow(
@@ -74,8 +81,8 @@ public class ProviderListItem extends LinearLayout {
         Resources r = getResources();
         ImageView providerIcon = mProviderIcon;
         ImageView statusIcon = mStatusIcon;
-        TextView line1 = mLine1;
-        TextView line2 = mLine2;
+        TextView providerName = mProviderName;
+        TextView loginName = mLoginName;
         TextView chatView = mChatView;
 
         int providerId = cursor.getInt(mProviderIdColumn);
@@ -85,10 +92,11 @@ public class ProviderListItem extends LinearLayout {
         providerIcon.setImageDrawable(
                 brandingRes.getDrawable(BrandingResourceIDs.DRAWABLE_LOGO));
 
+        mUnderBubble.setBackgroundDrawable(mDefaultBackground);
         if (!cursor.isNull(mActiveAccountIdColumn)) {
-            line1.setVisibility(View.VISIBLE);
-            line1.setText(providerDisplayName);
-            line2.setText(cursor.getString(mActiveAccountUserNameColumn));
+            providerName.setVisibility(View.VISIBLE);
+            providerName.setText(providerDisplayName);
+            loginName.setText(cursor.getString(mActiveAccountUserNameColumn));
 
             long accountId = cursor.getLong(mActiveAccountIdColumn);
 
@@ -115,6 +123,7 @@ public class ProviderListItem extends LinearLayout {
                         } else {
                             chatView.setText(r.getString(R.string.conversations, count));
                         }
+                        mUnderBubble.setBackgroundDrawable(mBubbleDrawable);
                     } else {
                         chatView.setVisibility(View.GONE);
                     }
@@ -127,11 +136,11 @@ public class ProviderListItem extends LinearLayout {
             }
         } else {
             // No active account, show add account
-            line1.setVisibility(View.GONE);
+            providerName.setVisibility(View.GONE);
             statusIcon.setVisibility(View.GONE);
             chatView.setVisibility(View.GONE);
 
-            line2.setText(providerDisplayName);
+            loginName.setText(providerDisplayName);
         }
     }
 
