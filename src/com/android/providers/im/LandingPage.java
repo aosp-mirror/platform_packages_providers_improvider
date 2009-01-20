@@ -512,7 +512,7 @@ public class LandingPage extends ListActivity implements View.OnCreateContextMen
         boolean isLoggedIn = isSignedIn(providerCursor);
 
         if (!isLoggedIn) {
-            menu.add(0, ID_SIGN_IN, 0, R.string.sign_in).setIcon(android.R.drawable.ic_menu_login);
+            menu.add(0, ID_SIGN_IN, 0, R.string.sign_in).setIcon(com.android.internal.R.drawable.ic_menu_login);
         } else {
             BrandingResources brandingRes = getBrandingResource(providerId);
             menu.add(0, ID_VIEW_CONTACT_LIST, 0,
