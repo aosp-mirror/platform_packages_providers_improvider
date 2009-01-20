@@ -46,13 +46,27 @@
         android:layout_width="0dip"
         android:layout_height="fill_parent">    
 
-        <TextView android:id="@+id/providerName"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:maxLines="1"
-            android:textSize="16sp"
+        <LinearLayout android:orientation="horizontal"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
-
+            android:layout_height="0dip"
+            android:gravity="center_vertical"
+            android:layout_weight="1">
+            <TextView android:id="@+id/providerName"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:maxLines="1"
+                android:textSize="16sp"
+                android:ellipsize="marquee"
+                android:layout_weight="1"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content" />
+            <TextView android:id="@+id/conversations"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:paddingRight="3dip"
+                android:gravity="right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
         <LinearLayout android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="0dip"
@@ -65,18 +79,12 @@
                 android:layout_width="24dip"
                 android:layout_height="18dip"/>
             <TextView android:id="@+id/loginName"
+                android:ellipsize="marquee"
                 android:textSize="16sp"
                 android:maxLines="1"
                 android:layout_weight="1"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"/>
-            <TextView android:id="@+id/conversations"
-                android:textSize="12sp"
-                android:maxLines="1"
-                android:paddingRight="3dip"
-                android:gravity="right"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
         </LinearLayout>
     </LinearLayout>
     <View android:layout_width="5dip" android:layout_height="fill_parent"/>
