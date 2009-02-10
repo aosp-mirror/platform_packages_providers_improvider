@@ -73,7 +73,7 @@ public class ImProvider extends ContentProvider {
     private static final String TABLE_ACCOUNT_STATUS = "accountStatus";
 
     private static final String DATABASE_NAME = "im.db";
-    private static final int DATABASE_VERSION = 45;
+    private static final int DATABASE_VERSION = 46;
 
     protected static final int MATCH_PROVIDERS = 1;
     protected static final int MATCH_PROVIDERS_BY_ID = 2;
@@ -303,6 +303,24 @@ public class ImProvider extends ContentProvider {
                         db.endTransaction();
                     }
 
+                case 45:
+                    if (newVersion <= 45) {
+                        return;
+                    }
+
+                    db.beginTransaction();
+                    try {
+                        // add an otr_etag column to contact etag table
+                        db.execSQL(
+                                "ALTER TABLE " + TABLE_CONTACTS_ETAG + " ADD COLUMN otr_etag TEXT;");
+                        db.setTransactionSuccessful();
+                    } catch (Throwable ex) {
+                        Log.e(LOG_TAG, ex.getMessage(), ex);
+                        break; // force to destroy all old data;
+                    } finally {
+                        db.endTransaction();
+                    }
+
                     return;
             }
 
@@ -352,7 +370,7 @@ public class ImProvider extends ContentProvider {
 
             // Off the record status
             buf.append("otr INTEGER");
-
+            
             buf.append(");");
 
             db.execSQL(buf.toString());
@@ -365,6 +383,7 @@ public class ImProvider extends ContentProvider {
             buf.append(" (");
             buf.append("_id INTEGER PRIMARY KEY,");
             buf.append("etag TEXT,");
+            buf.append("otr_etag TEXT,");
             buf.append("account INTEGER UNIQUE");
             buf.append(");");
 
@@ -1213,6 +1232,8 @@ public class ImProvider extends ContentProvider {
 
     // package scope for testing.
     boolean insertBulkContacts(ContentValues values) {
+        //if (DBG) log("insertBulkContacts: begin");
+        
         ArrayList<String> usernames = values.getStringArrayList(Im.Contacts.USERNAME);
         ArrayList<String> nicknames = values.getStringArrayList(Im.Contacts.NICKNAME);
         int usernameCount = usernames.size();
@@ -1231,7 +1252,8 @@ public class ImProvider extends ContentProvider {
                 values.getStringArrayList(Im.Contacts.SUBSCRIPTION_TYPE);
         ArrayList<String> quickContactArray = values.getStringArrayList(Im.Contacts.QUICK_CONTACT);
         ArrayList<String> rejectedArray = values.getStringArrayList(Im.Contacts.REJECTED);
-
+        int sum = 0;
+            
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
         db.beginTransaction();
@@ -1275,10 +1297,12 @@ public class ImProvider extends ContentProvider {
                     Log.e(LOG_TAG, "insertBulkContacts: caught " + ex);
                 }
 
+                /*
                 if (DBG) log("insertBulkContacts[" + i + "] username=" +
                         username + ", nickname=" + nickname + ", type=" + type +
                         ", subscriptionStatus=" + subscriptionStatus + ", subscriptionType=" +
                         subscriptionType + ", qc=" + quickContact);
+                */
 
                 contactValues.put(Im.Contacts.USERNAME, username);
                 contactValues.put(Im.Contacts.NICKNAME, nickname);
@@ -1296,15 +1320,41 @@ public class ImProvider extends ContentProvider {
                     contactValues.put(Im.Contacts.REJECTED, rejected);
                 }
 
-                long rowId = db.insert(TABLE_CONTACTS, USERNAME, contactValues);
+                long rowId = 0;
 
-                if (!USE_CONTACT_PRESENCE_TRIGGER) {
-                    // seed the presence for the new contact
-                    //if (DBG) log("seedPresence for pid " + rowId);
-                    presenceValues.put(Im.Presence.CONTACT_ID, rowId);
-                    db.insert(TABLE_PRESENCE, null, presenceValues);
+                /* save this code for when we add constraint (account, username) to the contacts
+                   table
+                try {
+                    rowId = db.insertOrThrow(TABLE_CONTACTS, USERNAME, contactValues);
+                } catch (android.database.sqlite.SQLiteConstraintException ex) {
+                    if (DBG) log("insertBulkContacts: insert " + username + " caught " + ex);
+                    
+                    // append username to the selection clause
+                    updateSelection.delete(0, updateSelection.length());
+                    updateSelection.append(Im.Contacts.USERNAME);
+                    updateSelection.append("=?");
+                    updateSelectionArgs[0] = username;
+
+                    int updated = db.update(TABLE_CONTACTS, contactValues,
+                            updateSelection.toString(), updateSelectionArgs);
+
+                    if (DBG && updated != 1) {
+                        log("insertBulkContacts: update " + username + " failed!");
+                    }
                 }
+                */
 
+                rowId = db.insert(TABLE_CONTACTS, USERNAME, contactValues);
+                if (rowId > 0) {
+                    sum++;
+                    if (!USE_CONTACT_PRESENCE_TRIGGER) {
+                        // seed the presence for the new contact
+                        //if (DBG) log("seedPresence for pid " + rowId);
+                        presenceValues.put(Im.Presence.CONTACT_ID, rowId);
+                        db.insert(TABLE_PRESENCE, null, presenceValues);
+                    }
+                }
+                
                 // yield the lock if anyone else is trying to
                 // perform a db operation here.
                 db.yieldIfContended();
@@ -1316,7 +1366,7 @@ public class ImProvider extends ContentProvider {
         }
 
         // We know that we succeeded becuase endTransaction throws if the transaction failed.
-        if (DBG) log("insertBulkContacts: success = " + true);
+        if (DBG) log("insertBulkContacts: added " + sum + " contacts!");
         return true;
     }
 
@@ -1354,6 +1404,9 @@ public class ImProvider extends ContentProvider {
             contactValues.put(Im.Contacts.PROVIDER, provider);
             contactValues.put(Im.Contacts.ACCOUNT, account);
 
+            StringBuilder updateSelection = new StringBuilder();
+            String[] updateSelectionArgs = new String[1];
+
             for (int i=0; i<usernameCount; i++) {
                 String username = usernames.get(i);
                 String nickname = nicknames.get(i);
@@ -1387,16 +1440,19 @@ public class ImProvider extends ContentProvider {
                 contactValues.put(Im.Contacts.REJECTED, rejected);
 
                 // append username to the selection clause
-                StringBuilder selection = new StringBuilder(userWhere);
-                selection.append(" AND ");
-                selection.append(Im.Contacts.USERNAME);
-                selection.append("=?");
+                updateSelection.delete(0, updateSelection.length());
+                updateSelection.append(userWhere);
+                updateSelection.append(" AND ");
+                updateSelection.append(Im.Contacts.USERNAME);
+                updateSelection.append("=?");
+
+                updateSelectionArgs[0] = username;
 
                 int numUpdated = db.update(TABLE_CONTACTS, contactValues,
-                        selection.toString(), new String[] {username});
+                        updateSelection.toString(), updateSelectionArgs);
                 if (numUpdated == 0) {
                     Log.e(LOG_TAG, "[ImProvider] updateBulkContacts: " +
-                            " update failed for selection = " + selection);
+                            " update failed for selection = " + updateSelection);
                 } else {
                     sum += numUpdated;
                 }
@@ -1599,11 +1655,13 @@ public class ImProvider extends ContentProvider {
                     Log.e(LOG_TAG, "[ImProvider] updateBulkPresence: caught " + ex);
                 }
 
+                /*
                 if (DBG) {
                     log("updateBulkPresence[" + i + "] username=" + username + ", priority=" +
                             priority + ", mode=" + mode + ", status=" + status + ", resource=" +
                             jidResource + ", clientType=" + clientType);
                 }
+                */
 
                 if (modeArray != null) {
                     presenceValues.put(Im.Presence.PRESENCE_STATUS, mode);
@@ -2546,6 +2604,7 @@ public class ImProvider extends ContentProvider {
                 if (count > 0) {
                      getContext().getContentResolver().notifyChange(Im.Contacts.CONTENT_URI, null);
                 }
+
                 return count;
 
             case MATCH_INVITATION:
