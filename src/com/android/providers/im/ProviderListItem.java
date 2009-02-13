@@ -42,6 +42,7 @@ public class ProviderListItem extends LinearLayout {
     private TextView mChatView;
     private View mUnderBubble;
     private Drawable mBubbleDrawable, mDefaultBackground;
+    private View mLoginNameSection;
     
     private int mProviderIdColumn;
     private int mProviderFullnameColumn;
@@ -62,6 +63,7 @@ public class ProviderListItem extends LinearLayout {
         mLoginName = (TextView) findViewById(R.id.loginName);
         mChatView = (TextView) findViewById(R.id.conversations);
         mUnderBubble = (View) findViewById(R.id.underBubble);
+        mLoginNameSection = (View) findViewById(R.id.loginNameSection);
         mBubbleDrawable = getResources().getDrawable(R.drawable.bubble);
         mDefaultBackground = getResources().getDrawable(R.drawable.default_background);
         
@@ -94,6 +96,7 @@ public class ProviderListItem extends LinearLayout {
 
         mUnderBubble.setBackgroundDrawable(mDefaultBackground);
         if (!cursor.isNull(mActiveAccountIdColumn)) {
+            mLoginNameSection.setVisibility(View.VISIBLE);
             providerName.setVisibility(View.VISIBLE);
             providerName.setText(providerDisplayName);
             loginName.setText(cursor.getString(mActiveAccountUserNameColumn));
@@ -136,11 +139,9 @@ public class ProviderListItem extends LinearLayout {
             }
         } else {
             // No active account, show add account
-            providerName.setVisibility(View.GONE);
-            statusIcon.setVisibility(View.GONE);
-            chatView.setVisibility(View.GONE);
+            mLoginNameSection.setVisibility(View.GONE);
 
-            loginName.setText(providerDisplayName);
+            mProviderName.setText(providerDisplayName);
         }
     }
 
