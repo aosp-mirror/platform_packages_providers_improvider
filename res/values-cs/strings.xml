@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="ro_perm_label">"číst zprávy chatu"</string>
+    <string name="ro_perm_desc">"Povoluje aplikacím číst data z poskytovatele obsahu chatu."</string>
+    <string name="wo_perm_label">"chatovat"</string>
+    <string name="wo_perm_desc">"Povoluje aplikacím zapisovat data do poskytovatele obsahu chatových zpráv."</string>
+    <string name="im_label">"Chat"</string>
+    <string name="landing_page_title">"Chat – vyberte účet"</string>
+    <string name="menu_add_account">"Přidat účet"</string>
+    <string name="menu_edit_account">"Upravit účet"</string>
+    <string name="menu_remove_account">"Odstranit účet"</string>
+    <string name="sign_in">"Přihlásit se"</string>
+    <string name="menu_sign_out">"Odhlásit se"</string>
+    <string name="menu_settings">"Nastavení"</string>
+    <string name="menu_sign_out_all">"Odhlásit se ze všech služeb"</string>
+    <string name="choose_account_title">"Chat – vyberte účet"</string>
+    <!-- no translation found for conversations (6809253595345281731) -->
+    <skip />
+    <string name="add_account">"Přidat účet <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <string name="menu_view_contact_list">"Seznam kontaktů"</string>
+    <string name="signing_in_wait">"Přihlašování..."</string>
+</resources>

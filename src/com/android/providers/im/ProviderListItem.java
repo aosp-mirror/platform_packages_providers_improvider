@@ -42,7 +42,6 @@ public class ProviderListItem extends LinearLayout {
     private TextView mChatView;
     private View mUnderBubble;
     private Drawable mBubbleDrawable, mDefaultBackground;
-    private View mLoginNameSection;
     
     private int mProviderIdColumn;
     private int mProviderFullnameColumn;
@@ -63,7 +62,6 @@ public class ProviderListItem extends LinearLayout {
         mLoginName = (TextView) findViewById(R.id.loginName);
         mChatView = (TextView) findViewById(R.id.conversations);
         mUnderBubble = (View) findViewById(R.id.underBubble);
-        mLoginNameSection = (View) findViewById(R.id.loginNameSection);
         mBubbleDrawable = getResources().getDrawable(R.drawable.bubble);
         mDefaultBackground = getResources().getDrawable(R.drawable.default_background);
         
@@ -95,21 +93,23 @@ public class ProviderListItem extends LinearLayout {
                 brandingRes.getDrawable(BrandingResourceIDs.DRAWABLE_LOGO));
 
         mUnderBubble.setBackgroundDrawable(mDefaultBackground);
+        statusIcon.setVisibility(View.GONE);
+
         if (!cursor.isNull(mActiveAccountIdColumn)) {
-            mLoginNameSection.setVisibility(View.VISIBLE);
+            mLoginName.setVisibility(View.VISIBLE);
             providerName.setVisibility(View.VISIBLE);
             providerName.setText(providerDisplayName);
-            loginName.setText(cursor.getString(mActiveAccountUserNameColumn));
 
             long accountId = cursor.getLong(mActiveAccountIdColumn);
-
             int connectionStatus = cursor.getInt(mAccountConnectionStatusColumn);
+
+            String secondRowText;
+
+            chatView.setVisibility(View.GONE);
 
             switch (connectionStatus) {
                 case Im.ConnectionStatus.CONNECTING:
-                    statusIcon.setVisibility(View.GONE);
-                    chatView.setVisibility(View.VISIBLE);
-                    chatView.setText(R.string.signing_in_wait);
+                    secondRowText = r.getString(R.string.signing_in_wait);
                     break;
 
                 case Im.ConnectionStatus.ONLINE:
@@ -118,28 +118,27 @@ public class ProviderListItem extends LinearLayout {
                             brandingRes.getDrawable(presenceIconId));
                     statusIcon.setVisibility(View.VISIBLE);
                     ContentResolver cr = mActivity.getContentResolver();
+                    
                     int count = getConversationCount(cr, accountId);
                     if (count > 0) {
-                        chatView.setVisibility(View.VISIBLE);
-                        if (count == 1) {
-                            chatView.setText(R.string.one_conversation);
-                        } else {
-                            chatView.setText(r.getString(R.string.conversations, count));
-                        }
                         mUnderBubble.setBackgroundDrawable(mBubbleDrawable);
-                    } else {
-                        chatView.setVisibility(View.GONE);
+                        chatView.setVisibility(View.VISIBLE);
+                        chatView.setText(r.getString(R.string.conversations, count));
                     }
+                    
+                    secondRowText = cursor.getString(mActiveAccountUserNameColumn);
                     break;
 
                 default:
-                    statusIcon.setVisibility(View.GONE);
-                    chatView.setVisibility(View.GONE);
+                    secondRowText = cursor.getString(mActiveAccountUserNameColumn);
                     break;
             }
+
+            loginName.setText(secondRowText);
+
         } else {
             // No active account, show add account
-            mLoginNameSection.setVisibility(View.GONE);
+            mLoginName.setVisibility(View.GONE);
 
             mProviderName.setText(providerDisplayName);
         }

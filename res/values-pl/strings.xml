@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="ro_perm_label">"odczytaj wiadomości komunikatora"</string>
+    <string name="ro_perm_desc">"Zezwalaj aplikacjom na odczytywanie danych dostawcy zawartości komunikatora"</string>
+    <string name="wo_perm_label">"zapisz wiadomości komunikatora"</string>
+    <string name="wo_perm_desc">"Zezwalaj aplikacjom na zapisywanie danych do dostawcy zawartości komunikatora"</string>
+    <string name="im_label">"Komunikator"</string>
+    <string name="landing_page_title">"Czat: Wybierz konto"</string>
+    <string name="menu_add_account">"Dodaj konto"</string>
+    <string name="menu_edit_account">"Edytuj konto"</string>
+    <string name="menu_remove_account">"Usuń konto"</string>
+    <string name="sign_in">"Zaloguj się"</string>
+    <string name="menu_sign_out">"Wyloguj się"</string>
+    <string name="menu_settings">"Ustawienia"</string>
+    <string name="menu_sign_out_all">"Wyloguj wszystkie"</string>
+    <string name="choose_account_title">"Czat: Wybierz konto"</string>
+    <!-- no translation found for conversations (6809253595345281731) -->
+    <skip />
+    <string name="add_account">"Dodaj konto <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <string name="menu_view_contact_list">"Lista kontaktów"</string>
+    <string name="signing_in_wait">"Trwa logowanie..."</string>
+</resources>
