@@ -71,9 +71,10 @@ public class ImProvider extends ContentProvider {
     private static final String TABLE_OUTGOING_RMQ_MESSAGES = "outgoingRmqMessages";
     private static final String TABLE_LAST_RMQ_ID = "lastrmqid";
     private static final String TABLE_ACCOUNT_STATUS = "accountStatus";
+    private static final String TABLE_BRANDING_RESOURCE_MAP_CACHE = "brandingResMapCache";
 
     private static final String DATABASE_NAME = "im.db";
-    private static final int DATABASE_VERSION = 46;
+    private static final int DATABASE_VERSION = 47;
 
     protected static final int MATCH_PROVIDERS = 1;
     protected static final int MATCH_PROVIDERS_BY_ID = 2;
@@ -132,6 +133,7 @@ public class ImProvider extends ContentProvider {
     protected static final int MATCH_LAST_RMQ_ID = 113;
     protected static final int MATCH_ACCOUNTS_STATUS = 114;
     protected static final int MATCH_ACCOUNT_STATUS = 115;
+    protected static final int MATCH_BRANDING_RESOURCE_MAP_CACHE = 120;
 
 
     protected final UriMatcher mUrlMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -256,6 +258,13 @@ public class ImProvider extends ContentProvider {
                     "rmq_id INTEGER" +
                     ");");
 
+            db.execSQL("create TABLE " + TABLE_BRANDING_RESOURCE_MAP_CACHE + " (" +
+                    "_id INTEGER PRIMARY KEY," +
+                    "provider_id INTEGER," +
+                    "app_res_id INTEGER," +
+                    "plugin_res_id INTEGER" +
+                    ");");
+
             // clean up account specific data when an account is deleted.
             db.execSQL("CREATE TRIGGER account_cleanup " +
                     "DELETE ON " + TABLE_ACCOUNTS +
@@ -321,6 +330,28 @@ public class ImProvider extends ContentProvider {
                         db.endTransaction();
                     }
 
+                case 46:
+                    if (newVersion <= 46) {
+                        return;
+                    }
+
+                    db.beginTransaction();
+                    try {
+                        // add branding resource map cache table
+                        db.execSQL("create TABLE " + TABLE_BRANDING_RESOURCE_MAP_CACHE + " (" +
+                                "_id INTEGER PRIMARY KEY," +
+                                "provider_id INTEGER," +
+                                "app_res_id INTEGER," +
+                                "plugin_res_id INTEGER" +
+                                ");");
+                        db.setTransactionSuccessful();
+                    } catch (Throwable ex) {
+                        Log.e(LOG_TAG, ex.getMessage(), ex);
+                        break; // force to destroy all old data;
+                    } finally {
+                        db.endTransaction();
+                    }
+
                     return;
             }
 
@@ -339,6 +370,7 @@ public class ImProvider extends ContentProvider {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROVIDER_SETTINGS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_OUTGOING_RMQ_MESSAGES);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_LAST_RMQ_ID);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_BRANDING_RESOURCE_MAP_CACHE);
         }
 
         private void createContactsTables(SQLiteDatabase db) {
@@ -739,6 +771,8 @@ public class ImProvider extends ContentProvider {
 
         mUrlMatcher.addURI(authority, "accountStatus", MATCH_ACCOUNTS_STATUS);
         mUrlMatcher.addURI(authority, "accountStatus/#", MATCH_ACCOUNT_STATUS);
+
+        mUrlMatcher.addURI(authority, "brandingResMapCache", MATCH_BRANDING_RESOURCE_MAP_CACHE);
     }
 
     @Override
@@ -1084,6 +1118,10 @@ public class ImProvider extends ContentProvider {
                 qb.setTables(TABLE_ACCOUNT_STATUS);
                 appendWhere(whereClause, Im.AccountStatus.ACCOUNT, "=",
                         url.getPathSegments().get(1));
+                break;
+
+            case MATCH_BRANDING_RESOURCE_MAP_CACHE:
+                qb.setTables(TABLE_BRANDING_RESOURCE_MAP_CACHE);
                 break;
 
             default:
@@ -1924,6 +1962,13 @@ public class ImProvider extends ContentProvider {
                     resultUri = Uri.parse(Im.AccountStatus.CONTENT_URI + "/" + rowID);
                 }
                 notifyProviderAccountContentUri = true;
+                break;
+
+            case MATCH_BRANDING_RESOURCE_MAP_CACHE:
+                rowID = db.insert(TABLE_BRANDING_RESOURCE_MAP_CACHE, null, initialValues);
+                if (rowID > 0) {
+                    resultUri = Uri.parse(Im.BrandingResourceMapCache.CONTENT_URI + "/" + rowID);
+                }
                 break;
 
             default:

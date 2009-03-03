@@ -19,7 +19,7 @@
     <string name="ro_perm_desc">"Consente alle applicazioni di leggere dati del provider di contenuti IM."</string>
     <string name="wo_perm_label">"scrivere messaggi immediati"</string>
     <string name="wo_perm_desc">"Consente alle applicazioni di scrivere dati per il provider di contenuti IM."</string>
-    <string name="im_label">"IM"</string>
+    <string name="im_label">"Chat"</string>
     <string name="landing_page_title">"Chat - Seleziona un account"</string>
     <string name="menu_add_account">"Aggiungi account"</string>
     <string name="menu_edit_account">"Modifica account"</string>
