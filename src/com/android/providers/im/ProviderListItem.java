@@ -26,7 +26,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.im.BrandingResourceIDs;
 import android.provider.Im;
-import android.content.res.ColorStateList;
 import android.view.View;
 import android.util.Log;
 import com.android.providers.im.R;
@@ -50,10 +49,6 @@ public class ProviderListItem extends LinearLayout {
     private int mActiveAccountUserNameColumn;
     private int mAccountPresenceStatusColumn;
     private int mAccountConnectionStatusColumn;
-    
-    private ColorStateList mProviderNameColors;
-    private ColorStateList mLoginNameColors;
-    private ColorStateList mChatViewColors;
 
     public ProviderListItem(Context context, LandingPage activity) {
         super(context);
@@ -80,10 +75,6 @@ public class ProviderListItem extends LinearLayout {
                 Im.Provider.ACCOUNT_PRESENCE_STATUS);
         mAccountConnectionStatusColumn = c.getColumnIndexOrThrow(
                 Im.Provider.ACCOUNT_CONNECTION_STATUS);
-        
-        mProviderNameColors = mProviderName.getTextColors();
-        mLoginNameColors = mLoginName.getTextColors();
-        mChatViewColors = mChatView.getTextColors();
     }
 
     public void bindView(Cursor cursor) {
@@ -103,10 +94,6 @@ public class ProviderListItem extends LinearLayout {
 
         mUnderBubble.setBackgroundDrawable(mDefaultBackground);
         statusIcon.setVisibility(View.GONE);
-
-        providerName.setTextColor(mProviderNameColors);
-        loginName.setTextColor(mLoginNameColors);
-        chatView.setTextColor(mChatViewColors);
 
         if (!cursor.isNull(mActiveAccountIdColumn)) {
             mLoginName.setVisibility(View.VISIBLE);
@@ -137,10 +124,6 @@ public class ProviderListItem extends LinearLayout {
                         mUnderBubble.setBackgroundDrawable(mBubbleDrawable);
                         chatView.setVisibility(View.VISIBLE);
                         chatView.setText(r.getString(R.string.conversations, count));
-
-                        providerName.setTextColor(0xff000000);
-                        loginName.setTextColor(0xff000000);
-                        chatView.setTextColor(0xff000000);
                     }
                     
                     secondRowText = cursor.getString(mActiveAccountUserNameColumn);

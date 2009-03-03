@@ -15,11 +15,11 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ro_perm_label">"Lecture des messages instantanés"</string>
+    <string name="ro_perm_label">"lire les messages instantanés"</string>
     <string name="ro_perm_desc">"Permet aux applications de lire les données du prestataire de contenu de messagerie instantanée."</string>
     <string name="wo_perm_label">"écrire des messages instantanées"</string>
     <string name="wo_perm_desc">"Permet aux applications d\'écrire les données pour le prestataire de contenu de messagerie instantanée."</string>
-    <string name="im_label">"Chat"</string>
+    <string name="im_label">"Messagerie instantanée"</string>
     <string name="landing_page_title">"Chat : sélectionner un compte"</string>
     <string name="menu_add_account">"Ajouter un compte"</string>
     <string name="menu_edit_account">"Modifier un compte"</string>
