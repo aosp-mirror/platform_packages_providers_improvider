@@ -2435,6 +2435,10 @@ public class ImProvider extends ContentProvider {
                 tableToChange = TABLE_LAST_RMQ_ID;
                 break;
 
+            case MATCH_BRANDING_RESOURCE_MAP_CACHE:
+                tableToChange = TABLE_BRANDING_RESOURCE_MAP_CACHE;
+                break;
+
             default:
                 throw new UnsupportedOperationException("Cannot delete that URL: " + url);
         }
