@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="ro_perm_label">"阅读即时消息"</string>
+    <string name="ro_perm_desc">"允许应用程序从即时消息内容提供者处读取数据。"</string>
+    <string name="wo_perm_label">"编写即时消息"</string>
+    <string name="wo_perm_desc">"允许应用程序向即时消息内容提供者写入数据。"</string>
+    <string name="im_label">"即时消息"</string>
+    <string name="landing_page_title">"聊天 - 选择一个帐户"</string>
+    <string name="menu_add_account">"添加帐户"</string>
+    <string name="menu_edit_account">"编辑帐户"</string>
+    <string name="menu_remove_account">"删除帐户"</string>
+    <string name="sign_in">"登录"</string>
+    <string name="menu_sign_out">"登出"</string>
+    <string name="menu_settings">"设置"</string>
+    <string name="menu_sign_out_all">"全部登出"</string>
+    <string name="choose_account_title">"聊天 - 选择一个帐户"</string>
+    <!-- no translation found for conversations (6809253595345281731) -->
+    <skip />
+    <string name="add_account">"添加 <xliff:g id="ACCOUNT">%1$s</xliff:g> 帐户"</string>
+    <string name="menu_view_contact_list">"联系人列表"</string>
+    <string name="signing_in_wait">"正在登录..."</string>
+</resources>

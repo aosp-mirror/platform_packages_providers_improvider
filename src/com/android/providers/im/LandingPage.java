@@ -88,21 +88,25 @@ public class LandingPage extends ListActivity implements View.OnCreateContextMen
             Im.Provider.ACCOUNT_CONNECTION_STATUS,
     };
 
-    static final int PROVIDER_ID_COLUMN = 0;
-    static final int PROVIDER_NAME_COLUMN = 1;
-    static final int PROVIDER_FULLNAME_COLUMN = 2;
-    static final int PROVIDER_CATEGORY_COLUMN = 3;
-    static final int ACTIVE_ACCOUNT_ID_COLUMN = 4;
-    static final int ACTIVE_ACCOUNT_USERNAME_COLUMN = 5;
-    static final int ACTIVE_ACCOUNT_PW_COLUMN = 6;
-    static final int ACTIVE_ACCOUNT_LOCKED = 7;
-    static final int ACCOUNT_PRESENCE_STATUS = 8;
-    static final int ACCOUNT_CONNECTION_STATUS = 9;
+    private static final int PROVIDER_ID_COLUMN = 0;
+    private static final int PROVIDER_NAME_COLUMN = 1;
+    private static final int PROVIDER_FULLNAME_COLUMN = 2;
+    private static final int PROVIDER_CATEGORY_COLUMN = 3;
+    private static final int ACTIVE_ACCOUNT_ID_COLUMN = 4;
+    private static final int ACTIVE_ACCOUNT_USERNAME_COLUMN = 5;
+    private static final int ACTIVE_ACCOUNT_PW_COLUMN = 6;
+    private static final int ACTIVE_ACCOUNT_LOCKED = 7;
+    private static final int ACCOUNT_PRESENCE_STATUS = 8;
+    private static final int ACCOUNT_CONNECTION_STATUS = 9;
+
+    private static final String PROVIDER_SELECTION = "providers.name!=?";
 
     private HashMap<String, PluginInfo> mProviderToPluginMap;
     private HashMap<Long, PluginInfo> mAccountToPluginMap;
     private HashMap<Long, BrandingResources> mBrandingResources;
     private BrandingResources mDefaultBrandingResources;
+
+    private String[] mProviderSelectionArgs = new String[1];
 
     public class PluginInfo {
         public IImPlugin mPlugin;
@@ -144,10 +148,12 @@ public class LandingPage extends ListActivity implements View.OnCreateContextMen
 
         startPlugins();
 
+        // get everything except for Google Talk.
+        mProviderSelectionArgs[0] = Im.ProviderNames.GTALK;
         mProviderCursor = managedQuery(Im.Provider.CONTENT_URI_WITH_ACCOUNT,
                 PROVIDER_PROJECTION,
-                null /* selection */,
-                null /* selection args */,
+                PROVIDER_SELECTION /* selection */,
+                mProviderSelectionArgs /* selection args */,
                 Im.Provider.DEFAULT_SORT_ORDER);
         mAdapter = new ProviderAdapter(this, mProviderCursor);
         setListAdapter(mAdapter);

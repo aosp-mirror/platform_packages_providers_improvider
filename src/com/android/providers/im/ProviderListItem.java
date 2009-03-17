@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.im.BrandingResourceIDs;
 import android.provider.Im;
+import android.content.res.ColorStateList;
 import android.view.View;
 import android.util.Log;
 import com.android.providers.im.R;
@@ -49,6 +50,10 @@ public class ProviderListItem extends LinearLayout {
     private int mActiveAccountUserNameColumn;
     private int mAccountPresenceStatusColumn;
     private int mAccountConnectionStatusColumn;
+    
+    private ColorStateList mProviderNameColors;
+    private ColorStateList mLoginNameColors;
+    private ColorStateList mChatViewColors;
 
     public ProviderListItem(Context context, LandingPage activity) {
         super(context);
@@ -75,6 +80,10 @@ public class ProviderListItem extends LinearLayout {
                 Im.Provider.ACCOUNT_PRESENCE_STATUS);
         mAccountConnectionStatusColumn = c.getColumnIndexOrThrow(
                 Im.Provider.ACCOUNT_CONNECTION_STATUS);
+        
+        mProviderNameColors = mProviderName.getTextColors();
+        mLoginNameColors = mLoginName.getTextColors();
+        mChatViewColors = mChatView.getTextColors();
     }
 
     public void bindView(Cursor cursor) {
@@ -93,20 +102,27 @@ public class ProviderListItem extends LinearLayout {
                 brandingRes.getDrawable(BrandingResourceIDs.DRAWABLE_LOGO));
 
         mUnderBubble.setBackgroundDrawable(mDefaultBackground);
+        statusIcon.setVisibility(View.GONE);
+
+        providerName.setTextColor(mProviderNameColors);
+        loginName.setTextColor(mLoginNameColors);
+        chatView.setTextColor(mChatViewColors);
+
         if (!cursor.isNull(mActiveAccountIdColumn)) {
+            mLoginName.setVisibility(View.VISIBLE);
             providerName.setVisibility(View.VISIBLE);
             providerName.setText(providerDisplayName);
-            loginName.setText(cursor.getString(mActiveAccountUserNameColumn));
 
             long accountId = cursor.getLong(mActiveAccountIdColumn);
-
             int connectionStatus = cursor.getInt(mAccountConnectionStatusColumn);
+
+            String secondRowText;
+
+            chatView.setVisibility(View.GONE);
 
             switch (connectionStatus) {
                 case Im.ConnectionStatus.CONNECTING:
-                    statusIcon.setVisibility(View.GONE);
-                    chatView.setVisibility(View.VISIBLE);
-                    chatView.setText(R.string.signing_in_wait);
+                    secondRowText = r.getString(R.string.signing_in_wait);
                     break;
 
                 case Im.ConnectionStatus.ONLINE:
@@ -115,32 +131,33 @@ public class ProviderListItem extends LinearLayout {
                             brandingRes.getDrawable(presenceIconId));
                     statusIcon.setVisibility(View.VISIBLE);
                     ContentResolver cr = mActivity.getContentResolver();
+                    
                     int count = getConversationCount(cr, accountId);
                     if (count > 0) {
-                        chatView.setVisibility(View.VISIBLE);
-                        if (count == 1) {
-                            chatView.setText(R.string.one_conversation);
-                        } else {
-                            chatView.setText(r.getString(R.string.conversations, count));
-                        }
                         mUnderBubble.setBackgroundDrawable(mBubbleDrawable);
-                    } else {
-                        chatView.setVisibility(View.GONE);
+                        chatView.setVisibility(View.VISIBLE);
+                        chatView.setText(r.getString(R.string.conversations, count));
+
+                        providerName.setTextColor(0xff000000);
+                        loginName.setTextColor(0xff000000);
+                        chatView.setTextColor(0xff000000);
                     }
+                    
+                    secondRowText = cursor.getString(mActiveAccountUserNameColumn);
                     break;
 
                 default:
-                    statusIcon.setVisibility(View.GONE);
-                    chatView.setVisibility(View.GONE);
+                    secondRowText = cursor.getString(mActiveAccountUserNameColumn);
                     break;
             }
+
+            loginName.setText(secondRowText);
+
         } else {
             // No active account, show add account
-            providerName.setVisibility(View.GONE);
-            statusIcon.setVisibility(View.GONE);
-            chatView.setVisibility(View.GONE);
+            mLoginName.setVisibility(View.GONE);
 
-            loginName.setText(providerDisplayName);
+            mProviderName.setText(providerDisplayName);
         }
     }
 
