@@ -53,10 +53,8 @@
     <!-- These strings displayed on the landing page. -->
     <!-- The title of the landing page.-->
     <string name="choose_account_title">Chat - Select an account</string>
-    <!-- Displays if there is only one ongoing chat on the landing page.-->
-    <string name="one_conversation">1 chat</string>
     <!-- Displays the number of ongoing chats on the landing page.-->
-    <string name="conversations"><xliff:g id="count">%1$d</xliff:g> chats</string>
+    <string name="conversations">(%1$d)</string>
     <!-- The add account label on the landing page if there isn't any account.-->
     <string name="add_account">Add <xliff:g id="account">%1$s</xliff:g> account</string>
     
