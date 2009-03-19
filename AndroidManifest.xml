@@ -30,7 +30,8 @@
             android:writePermission="com.android.providers.im.permission.WRITE_ONLY"
             android:grantUriPermissions="true" />
 
-        <activity android:name=".LandingPage">
+        <activity android:name=".LandingPage"
+                android:enabled="@bool/enableLandingPageActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
