@@ -141,6 +141,8 @@ public class ProviderListItem extends LinearLayout {
                         providerName.setTextColor(0xff000000);
                         loginName.setTextColor(0xff000000);
                         chatView.setTextColor(0xff000000);
+                    } else {
+                        chatView.setVisibility(View.GONE);
                     }
                     
                     secondRowText = cursor.getString(mActiveAccountUserNameColumn);
