@@ -29,8 +29,7 @@
     <string name="menu_settings">"Ustawienia"</string>
     <string name="menu_sign_out_all">"Wyloguj wszystkie"</string>
     <string name="choose_account_title">"Czat: Wybierz konto"</string>
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
+    <string name="conversations">"(%1$d)"</string>
     <string name="add_account">"Dodaj konto <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="menu_view_contact_list">"Lista kontaktów"</string>
     <string name="signing_in_wait">"Trwa logowanie..."</string>

@@ -29,8 +29,7 @@
     <string name="menu_settings">"設定"</string>
     <string name="menu_sign_out_all">"全部登出"</string>
     <string name="choose_account_title">"即時通訊 - 選取帳戶"</string>
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
+    <string name="conversations">"(%1$d)"</string>
     <string name="add_account">"新增 <xliff:g id="ACCOUNT">%1$s</xliff:g> 帳戶"</string>
     <string name="menu_view_contact_list">"通訊錄"</string>
     <string name="signing_in_wait">"登入中…"</string>
