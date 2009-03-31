@@ -29,8 +29,7 @@
     <string name="menu_settings">"设置"</string>
     <string name="menu_sign_out_all">"全部登出"</string>
     <string name="choose_account_title">"聊天 - 选择一个帐户"</string>
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
+    <string name="conversations">"(%1$d)"</string>
     <string name="add_account">"添加 <xliff:g id="ACCOUNT">%1$s</xliff:g> 帐户"</string>
     <string name="menu_view_contact_list">"联系人列表"</string>
     <string name="signing_in_wait">"正在登录..."</string>

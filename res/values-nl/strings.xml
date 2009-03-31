@@ -29,8 +29,7 @@
     <string name="menu_settings">"Instellingen"</string>
     <string name="menu_sign_out_all">"Overal afmelden"</string>
     <string name="choose_account_title">"Chatten - Een account selecteren"</string>
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
+    <string name="conversations">"(%1$d)"</string>
     <string name="add_account">"<xliff:g id="ACCOUNT">%1$s</xliff:g>-account toevoegen"</string>
     <string name="menu_view_contact_list">"Lijst met contactpersonen"</string>
     <string name="signing_in_wait">"Aanmelden..."</string>

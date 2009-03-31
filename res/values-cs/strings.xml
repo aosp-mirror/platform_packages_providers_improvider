@@ -29,8 +29,7 @@
     <string name="menu_settings">"Nastavení"</string>
     <string name="menu_sign_out_all">"Odhlásit se ze všech služeb"</string>
     <string name="choose_account_title">"Chat – vyberte účet"</string>
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
+    <string name="conversations">"(%1$d)"</string>
     <string name="add_account">"Přidat účet <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="menu_view_contact_list">"Seznam kontaktů"</string>
     <string name="signing_in_wait">"Přihlašování..."</string>

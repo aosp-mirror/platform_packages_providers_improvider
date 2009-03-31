@@ -15,32 +15,21 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for ro_perm_label (8923213594676670163) -->
-    <skip />
-    <!-- no translation found for ro_perm_desc (6154703403388711809) -->
-    <skip />
-    <!-- no translation found for wo_perm_label (4771652386754813294) -->
-    <skip />
-    <!-- no translation found for wo_perm_desc (470416777693330370) -->
-    <skip />
+    <string name="ro_perm_label">"les lynmeldinger"</string>
+    <string name="ro_perm_desc">"Tillat applikasjoner å lese data fra lynmeldingsoperatøren."</string>
+    <string name="wo_perm_label">"write instant messages"</string>
+    <string name="wo_perm_desc">"Tillat applikasjonerå skrive data til lynmeldingsoperatøren."</string>
     <string name="im_label">"Nettprat"</string>
-    <!-- no translation found for landing_page_title (2177721703095999384) -->
-    <skip />
-    <!-- no translation found for menu_add_account (4184762314855405486) -->
-    <skip />
-    <!-- no translation found for menu_edit_account (6585077522972888350) -->
-    <skip />
-    <!-- no translation found for menu_remove_account (8013513817623405880) -->
-    <skip />
+    <string name="landing_page_title">"Lynmeldinger - velg en konto"</string>
+    <string name="menu_add_account">"Legg til konto"</string>
+    <string name="menu_edit_account">"Rediger konto"</string>
+    <string name="menu_remove_account">"Fjern konto"</string>
     <string name="sign_in">"Logg inn"</string>
     <string name="menu_sign_out">"Logg ut"</string>
     <string name="menu_settings">"Innstillinger"</string>
-    <!-- no translation found for menu_sign_out_all (945106187701517280) -->
-    <skip />
-    <!-- no translation found for choose_account_title (3179220583433723296) -->
-    <skip />
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
+    <string name="menu_sign_out_all">"Logg ut alle"</string>
+    <string name="choose_account_title">"Lynmeldinger - velg en konto"</string>
+    <string name="conversations">"COUNT samtaler"</string>
     <string name="add_account">"Legg til <xliff:g id="ACCOUNT">%1$s</xliff:g>-konto"</string>
     <string name="menu_view_contact_list">"Kontaktliste"</string>
     <string name="signing_in_wait">"Logger inn…"</string>
