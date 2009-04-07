@@ -31,6 +31,6 @@
     <string name="choose_account_title">"Chatten - Een account selecteren"</string>
     <string name="conversations">"(%1$d)"</string>
     <string name="add_account">"<xliff:g id="ACCOUNT">%1$s</xliff:g>-account toevoegen"</string>
-    <string name="menu_view_contact_list">"Lijst met contactpersonen"</string>
+    <string name="menu_view_contact_list">"Lijst met contacten"</string>
     <string name="signing_in_wait">"Aanmelden..."</string>
 </resources>
