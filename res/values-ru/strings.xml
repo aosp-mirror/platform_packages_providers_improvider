@@ -29,8 +29,7 @@
     <string name="menu_settings">"Настройки"</string>
     <string name="menu_sign_out_all">"Выйти отовсюду"</string>
     <string name="choose_account_title">"Чат – выберите аккаунт"</string>
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
+    <string name="conversations">"(%1$d)"</string>
     <string name="add_account">"Добавить аккаунт <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="menu_view_contact_list">"Список контактов"</string>
     <string name="signing_in_wait">"Выполняется вход..."</string>

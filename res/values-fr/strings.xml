@@ -29,8 +29,7 @@
     <string name="menu_settings">"Paramètres"</string>
     <string name="menu_sign_out_all">"Se déconnecter de tout"</string>
     <string name="choose_account_title">"Chat : sélectionner un compte"</string>
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
+    <string name="conversations">"(%1$d)"</string>
     <string name="add_account">"Ajouter le compte <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="menu_view_contact_list">"Liste de contacts"</string>
     <string name="signing_in_wait">"Connexion..."</string>
