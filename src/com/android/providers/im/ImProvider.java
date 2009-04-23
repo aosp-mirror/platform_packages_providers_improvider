@@ -49,7 +49,7 @@ public class ImProvider extends ContentProvider {
 
     private static final String AUTHORITY = "im";
 
-    private static final boolean USE_CONTACT_PRESENCE_TRIGGER = false;
+    private static final boolean MAKE_MESSAGE_PRESENCE_CHAT_PERSISTENT = true;
 
     private static final String TABLE_ACCOUNTS = "accounts";
     private static final String TABLE_PROVIDERS = "providers";
@@ -74,7 +74,7 @@ public class ImProvider extends ContentProvider {
     private static final String TABLE_BRANDING_RESOURCE_MAP_CACHE = "brandingResMapCache";
 
     private static final String DATABASE_NAME = "im.db";
-    private static final int DATABASE_VERSION = 47;
+    private static final int DATABASE_VERSION = 48;
 
     protected static final int MATCH_PROVIDERS = 1;
     protected static final int MATCH_PROVIDERS_BY_ID = 2;
@@ -226,6 +226,7 @@ public class ImProvider extends ContentProvider {
                     ");");
 
             createContactsTables(db);
+            createMessageChatTables(db, null /* no table prefix */);
 
             db.execSQL("CREATE TABLE " + TABLE_AVATARS + " (" +
                     "_id INTEGER PRIMARY KEY," +
@@ -352,6 +353,24 @@ public class ImProvider extends ContentProvider {
                         db.endTransaction();
                     }
 
+                case 47:
+                    if (newVersion <= 47) {
+                        return;
+                    }
+
+                    if (MAKE_MESSAGE_PRESENCE_CHAT_PERSISTENT) {
+                        db.beginTransaction();
+                        try {
+                            createMessageChatTables(db, null);
+                            db.setTransactionSuccessful();
+                        } catch (Throwable ex) {
+                            Log.e(LOG_TAG, ex.getMessage(), ex);
+                            break; // force to destroy all old data;
+                        } finally {
+                            db.endTransaction();
+                        }
+                    }
+
                     return;
             }
 
@@ -384,6 +403,7 @@ public class ImProvider extends ContentProvider {
             buf.append("_id INTEGER PRIMARY KEY,");
             buf.append("username TEXT,");
             buf.append("nickname TEXT,");
+
             buf.append("provider INTEGER,");
             buf.append("account INTEGER,");
             buf.append("contactList INTEGER,");
@@ -451,6 +471,51 @@ public class ImProvider extends ContentProvider {
             db.execSQL(buf.toString());
         }
 
+        private void createMessageChatTables(SQLiteDatabase db, String tablePrefix) {
+            String tableName;
+
+            tableName = (tablePrefix != null) ? tablePrefix+TABLE_MESSAGES : TABLE_MESSAGES;
+
+            // message table e
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+                    "_id INTEGER PRIMARY KEY," +
+                    "packet_id TEXT UNIQUE," +
+                    "contact TEXT," +
+                    "provider INTEGER," +
+                    "account INTEGER," +
+                    "body TEXT," +
+                    "date INTEGER," +    // in seconds
+                    "type INTEGER," +
+                    "err_code INTEGER NOT NULL DEFAULT 0," +
+                    "err_msg TEXT" +
+                    ");");
+
+            tableName = (tablePrefix != null) ? tablePrefix+TABLE_CHATS : TABLE_CHATS;
+
+            // chat sessions, including single person chats and group chats
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + tableName + " ("+
+                    "_id INTEGER PRIMARY KEY," +
+                    "contact_id INTEGER UNIQUE," +
+                    "jid_resource TEXT," +  // the JID resource for the user, only for non-group chats
+                    "groupchat INTEGER," +   // 1 if group chat, 0 if not TODO: remove this column
+                    "last_unread_message TEXT," +  // the last unread message
+                    "last_message_date INTEGER," +  // in seconds
+                    "unsent_composed_message TEXT," + // a composed, but not sent message
+                    "shortcut INTEGER" + // which of 10 slots (if any) this chat occupies
+                    ");");
+
+            if (MAKE_MESSAGE_PRESENCE_CHAT_PERSISTENT) {
+                String contactsTableName = TABLE_CONTACTS;
+
+                db.execSQL("CREATE TRIGGER IF NOT EXISTS contact_cleanup " +
+                        "DELETE ON " + contactsTableName +
+                           " BEGIN " +
+                               "DELETE FROM chats WHERE contact_id = OLD._id;" +
+                           "END");
+            }
+
+        }
+
         @Override
         public void onOpen(SQLiteDatabase db) {
             if (db.isReadOnly()) {
@@ -466,20 +531,9 @@ public class ImProvider extends ContentProvider {
             db.execSQL("ATTACH DATABASE ':memory:' AS " + mTransientDbName + ";");
             cpDbName = mTransientDbName + ".";
 
-            // message table (since the UI currently doesn't require saving message history
-            // across IM sessions, store the message table in memory db only)
-            db.execSQL("CREATE TABLE IF NOT EXISTS " + cpDbName + TABLE_MESSAGES + " (" +
-                    "_id INTEGER PRIMARY KEY," +
-                    "packet_id TEXT UNIQUE," +
-                    "contact TEXT," +
-                    "provider INTEGER," +
-                    "account INTEGER," +
-                    "body TEXT," +
-                    "date INTEGER," +    // in seconds
-                    "type INTEGER," +
-                    "err_code INTEGER NOT NULL DEFAULT 0," +
-                    "err_msg TEXT" +
-                    ");");
+            if (!MAKE_MESSAGE_PRESENCE_CHAT_PERSISTENT) {
+                createMessageChatTables(db, cpDbName);
+            }
 
             // presence
             db.execSQL("CREATE TABLE IF NOT EXISTS " + cpDbName + TABLE_PRESENCE + " ("+
@@ -525,18 +579,6 @@ public class ImProvider extends ContentProvider {
                     "err_msg TEXT" +
                     ");");
 
-            // chat sessions, including single person chats and group chats
-            db.execSQL("CREATE TABLE IF NOT EXISTS " + cpDbName + TABLE_CHATS + " ("+
-                    "_id INTEGER PRIMARY KEY," +
-                    "contact_id INTEGER UNIQUE," +
-                    "jid_resource TEXT," +  // the JID resource for the user, only for non-group chats
-                    "groupchat INTEGER," +   // 1 if group chat, 0 if not TODO: remove this column
-                    "last_unread_message TEXT," +  // the last unread message
-                    "last_message_date INTEGER," +  // in seconds
-                    "unsent_composed_message TEXT," + // a composed, but not sent message
-                    "shortcut INTEGER" + // which of 10 slots (if any) this chat occupies
-                    ");");
-
             db.execSQL("CREATE TABLE IF NOT EXISTS " + cpDbName + TABLE_ACCOUNT_STATUS + " (" +
                     "_id INTEGER PRIMARY KEY," +
                     "account INTEGER UNIQUE," +
@@ -546,27 +588,22 @@ public class ImProvider extends ContentProvider {
             );
 
             /* when we moved the contact table out of transient_db and into the main db, the
-               contact_cleanup and group_cleanup triggers don't work anymore. It seems we can't
+               presence and groupchat cleanup triggers don't work anymore. It seems we can't
                create triggers that reference objects in a different database!
 
-            String contactsTableName = TABLE_CONTACTS;
+            // Insert a default presence for newly inserted contact
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS contact_create_presence " +
+                    "AFTER INSERT ON " + contactsTableName +
+                        " WHEN NEW.type != " + Im.Contacts.TYPE_GROUP +
+                        " BEGIN " +
+                            "INSERT INTO presence (contact_id) VALUES (NEW._id);" +
+                        " END");
 
-            if (USE_CONTACT_PRESENCE_TRIGGER) {
-                // Insert a default presence for newly inserted contact
-                db.execSQL("CREATE TRIGGER IF NOT EXISTS " + cpDbName + "contact_create_presence " +
-                        "INSERT ON " + cpDbName + contactsTableName +
-                            " FOR EACH ROW WHEN NEW.type != " + Im.Contacts.TYPE_GROUP +
-                                " OR NEW.type != " + Im.Contacts.TYPE_BLOCKED +
-                            " BEGIN " +
-                                "INSERT INTO presence (contact_id) VALUES (NEW._id);" +
-                            " END");
-            }
-
-            db.execSQL("CREATE TRIGGER IF NOT EXISTS " + cpDbName + "contact_cleanup " +
-                    "DELETE ON " + cpDbName + contactsTableName +
+            // Remove the presence when the contact is removed.
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS contact_presence_cleanup " +
+                    "DELETE ON " + contactsTableName +
                        " BEGIN " +
                            "DELETE FROM presence WHERE contact_id = OLD._id;" +
-                           "DELETE FROM chats WHERE contact_id = OLD._id;" +
                        "END");
 
             // Cleans up group members and group messages when a group chat is deleted
@@ -1162,8 +1199,7 @@ public class ImProvider extends ContentProvider {
             StringBuilder whereClause, Uri url) {
         qb.setTables(CONTACT_JOIN_PRESENCE_CHAT_AVATAR_TABLE);
         qb.setProjectionMap(sContactsProjectionMap);
-        // we don't really need the provider id in query. account id
-        // is enough.
+        // we don't really need the provider id in query. account id is enough.
         appendWhere(whereClause, Im.Contacts.ACCOUNT, "=", url.getLastPathSegment());
     }
 
@@ -1358,7 +1394,7 @@ public class ImProvider extends ContentProvider {
                     contactValues.put(Im.Contacts.REJECTED, rejected);
                 }
 
-                long rowId = 0;
+                long rowId;
 
                 /* save this code for when we add constraint (account, username) to the contacts
                    table
@@ -1385,12 +1421,11 @@ public class ImProvider extends ContentProvider {
                 rowId = db.insert(TABLE_CONTACTS, USERNAME, contactValues);
                 if (rowId > 0) {
                     sum++;
-                    if (!USE_CONTACT_PRESENCE_TRIGGER) {
-                        // seed the presence for the new contact
-                        //if (DBG) log("seedPresence for pid " + rowId);
-                        presenceValues.put(Im.Presence.CONTACT_ID, rowId);
-                        db.insert(TABLE_PRESENCE, null, presenceValues);
-                    }
+
+                    // seed the presence for the new contact
+                    if (DBG) log("### seedPresence for contact id " + rowId);
+                    presenceValues.put(Im.Presence.CONTACT_ID, rowId);
+                    db.insert(TABLE_PRESENCE, null, presenceValues);
                 }
                 
                 // yield the lock if anyone else is trying to
@@ -1526,10 +1561,22 @@ public class ImProvider extends ContentProvider {
     private String[] mQueryContactPresenceSelectionArgs = new String[1];
 
     /**
-     * This method first performs a query for all the contacts (for the given account) that
-     * don't have a presence entry in the presence table. Then for each of those contacts,
-     * the method creates a presence row. The whole thing is done inside one database transaction
-     * to increase performance.
+     * make sure the presence for all contacts of a given account is set to offline, and
+     * each contact has a presence row associated with it. However, this method does not remove
+     * presences for which the corresponding contacts no longer exist. That's probably ok since
+     * presence is kept in memory, so it won't stay around for too long. Here is the algorithm.
+     *
+     * 1. for all presence that have a corresponding contact, make it OFFLINE. This is one sqlite
+     *    call.
+     * 2. query for all the contacts that don't have a presence, and add a presence row for them.
+     *
+     * TODO simplify the presence management! The desire is to have a presence row for each
+     * TODO contact in the database, so later we can just call update() on the presence rows
+     * TODO instead of checking for the existence of presence first. The assumption is we get
+     * TODO presence updates much more frequently. However, the logic to maintain that goal is
+     * TODO overly complicated. One possible solution is to use insert_or_replace the presence rows
+     * TODO when updating the presence. That way we don't always need to maintain an empty presence
+     * TODO row for each contact.
      *
      * @param account the account of the contacts for which we want to create seed presence rows.
      */
@@ -1550,7 +1597,7 @@ public class ImProvider extends ContentProvider {
             presenceValues.put(Im.Presence.PRESENCE_STATUS, Im.Presence.OFFLINE);
             presenceValues.put(Im.Presence.PRESENCE_CUSTOM_STATUS, "");
 
-            // First: update all the presence for the account so they are offline
+            // update all the presence for the account so they are offline
             StringBuilder buf = new StringBuilder();
             buf.append(Im.Presence.CONTACT_ID);
             buf.append(" in (select ");
@@ -1568,7 +1615,10 @@ public class ImProvider extends ContentProvider {
                     mQueryContactPresenceSelectionArgs);
             if (DBG) log("seedInitialPresence: reset " + count + " presence rows to OFFLINE");
 
-            // second: add a presence row for each contact that doesn't have a presence
+            // for in-memory presence table, add a presence row for each contact that
+            // doesn't have a presence. in-memory presence table isn't reliable, and goes away
+            // when device reboot or IMProvider process dies, so we can't rely on each contact
+            // have a corresponding presence.
             if (DBG) {
                 log("seedInitialPresence: contacts_with_no_presence_selection => " +
                         CONTACTS_WITH_NO_PRESENCE_SELECTION);
@@ -1600,11 +1650,13 @@ public class ImProvider extends ContentProvider {
                 }
             }
 
-            db.setTransactionSuccessful();
-
             if (DBG) log("seedInitialPresence: added " + count + " new presence rows");
+
+            db.setTransactionSuccessful();
         } finally {
-            c.close();
+            if (c != null) {
+                c.close();
+            }
             db.endTransaction();
         }
     }
