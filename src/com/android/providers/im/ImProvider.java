@@ -503,17 +503,6 @@ public class ImProvider extends ContentProvider {
                     "unsent_composed_message TEXT," + // a composed, but not sent message
                     "shortcut INTEGER" + // which of 10 slots (if any) this chat occupies
                     ");");
-
-            if (MAKE_MESSAGE_PRESENCE_CHAT_PERSISTENT) {
-                String contactsTableName = TABLE_CONTACTS;
-
-                db.execSQL("CREATE TRIGGER IF NOT EXISTS contact_cleanup " +
-                        "DELETE ON " + contactsTableName +
-                           " BEGIN " +
-                               "DELETE FROM chats WHERE contact_id = OLD._id;" +
-                           "END");
-            }
-
         }
 
         @Override
