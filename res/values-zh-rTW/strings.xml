@@ -32,6 +32,6 @@
     <!-- no translation found for conversations (6809253595345281731) -->
     <skip />
     <string name="add_account">"新增 <xliff:g id="ACCOUNT">%1$s</xliff:g> 帳戶"</string>
-    <string name="menu_view_contact_list">"通訊錄"</string>
+    <string name="menu_view_contact_list">"聯絡人"</string>
     <string name="signing_in_wait">"登入中…"</string>
 </resources>
