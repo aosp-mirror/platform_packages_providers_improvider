@@ -31,6 +31,6 @@
     <string name="choose_account_title">"即時通訊 - 選取帳戶"</string>
     <string name="conversations">"(%1$d)"</string>
     <string name="add_account">"新增 <xliff:g id="ACCOUNT">%1$s</xliff:g> 帳戶"</string>
-    <string name="menu_view_contact_list">"通訊錄"</string>
+    <string name="menu_view_contact_list">"聯絡人"</string>
     <string name="signing_in_wait">"登入中…"</string>
 </resources>
