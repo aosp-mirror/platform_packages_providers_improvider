@@ -67,13 +67,14 @@ public class ImProvider extends ContentProvider {
     private static final String TABLE_AVATARS = "avatars";
     private static final String TABLE_SESSION_COOKIES = "sessionCookies";
     private static final String TABLE_MESSAGES = "messages";
+    private static final String TABLE_IN_MEMORY_MESSAGES = "inMemoryMessages";
     private static final String TABLE_OUTGOING_RMQ_MESSAGES = "outgoingRmqMessages";
     private static final String TABLE_LAST_RMQ_ID = "lastrmqid";
     private static final String TABLE_ACCOUNT_STATUS = "accountStatus";
     private static final String TABLE_BRANDING_RESOURCE_MAP_CACHE = "brandingResMapCache";
 
     private static final String DATABASE_NAME = "im.db";
-    private static final int DATABASE_VERSION = 49;
+    private static final int DATABASE_VERSION = 50;
 
     protected static final int MATCH_PROVIDERS = 1;
     protected static final int MATCH_PROVIDERS_BY_ID = 2;
@@ -105,24 +106,30 @@ public class ImProvider extends ContentProvider {
     protected static final int MATCH_PRESENCE_BY_ACCOUNT = 42;
     protected static final int MATCH_PRESENCE_SEED_BY_ACCOUNT = 43;
     protected static final int MATCH_PRESENCE_BULK = 44;
+
     protected static final int MATCH_MESSAGES = 50;
     protected static final int MATCH_MESSAGES_BY_CONTACT = 51;
     protected static final int MATCH_MESSAGES_BY_THREAD_ID = 52;
     protected static final int MATCH_MESSAGES_BY_PROVIDER = 53;
-    protected static final int MATCH_MESSAGE = 54;
-    protected static final int MATCH_GROUP_MESSAGES = 55;
-    protected static final int MATCH_GROUP_MESSAGE_BY_THREAD_ID = 56;
-    protected static final int MATCH_GROUP_MESSAGE = 57;
-    protected static final int MATCH_GROUP_MEMBERS = 58;
-    protected static final int MATCH_GROUP_MEMBERS_BY_GROUP = 59;
-    protected static final int MATCH_AVATARS = 60;
-    protected static final int MATCH_AVATAR = 61;
-    protected static final int MATCH_AVATAR_BY_PROVIDER = 62;
-    protected static final int MATCH_CHATS = 70;
-    protected static final int MATCH_CHATS_BY_ACCOUNT = 71;
-    protected static final int MATCH_CHATS_ID = 72;
-    protected static final int MATCH_SESSIONS = 80;
-    protected static final int MATCH_SESSIONS_BY_PROVIDER = 81;
+    protected static final int MATCH_MESSAGES_BY_ACCOUNT = 54;
+    protected static final int MATCH_MESSAGE = 55;
+    protected static final int MATCH_OTR_MESSAGES = 56;
+    protected static final int MATCH_OTR_MESSAGES_BY_CONTACT = 57;
+    protected static final int MATCH_OTR_MESSAGES_BY_THREAD_ID = 58;
+    protected static final int MATCH_OTR_MESSAGES_BY_PROVIDER = 59;
+    protected static final int MATCH_OTR_MESSAGES_BY_ACCOUNT = 60;
+    protected static final int MATCH_OTR_MESSAGE = 61;
+
+    protected static final int MATCH_GROUP_MEMBERS = 65;
+    protected static final int MATCH_GROUP_MEMBERS_BY_GROUP = 66;
+    protected static final int MATCH_AVATARS = 70;
+    protected static final int MATCH_AVATAR = 71;
+    protected static final int MATCH_AVATAR_BY_PROVIDER = 72;
+    protected static final int MATCH_CHATS = 80;
+    protected static final int MATCH_CHATS_BY_ACCOUNT = 81;
+    protected static final int MATCH_CHATS_ID = 82;
+    protected static final int MATCH_SESSIONS = 83;
+    protected static final int MATCH_SESSIONS_BY_PROVIDER = 84;
     protected static final int MATCH_PROVIDER_SETTINGS = 90;
     protected static final int MATCH_PROVIDER_SETTINGS_BY_ID = 91;
     protected static final int MATCH_PROVIDER_SETTINGS_BY_ID_AND_NAME = 92;
@@ -145,6 +152,7 @@ public class ImProvider extends ContentProvider {
     private static final HashMap<String, String> sContactListProjectionMap;
     private static final HashMap<String, String> sBlockedListProjectionMap;
     private static final HashMap<String, String> sMessagesProjectionMap;
+    private static final HashMap<String, String> sInMemoryMessagesProjectionMap;
 
 
     private static final String PROVIDER_JOIN_ACCOUNT_TABLE =
@@ -172,6 +180,10 @@ public class ImProvider extends ContentProvider {
     private static final String MESSAGE_JOIN_CONTACT_TABLE =
             "messages LEFT OUTER JOIN contacts ON (contacts._id = messages.thread_id)";
 
+    private static final String IN_MEMORY_MESSAGES_JOIN_CONTACT_TABLE =
+            "inMemoryMessages LEFT OUTER JOIN contacts ON " +
+                "(contacts._id = inMemoryMessages.thread_id)";
+    
     /**
      * The where clause for filtering out blocked contacts
      */
@@ -545,6 +557,25 @@ public class ImProvider extends ContentProvider {
             }
         }
 
+        private void createInMemoryMessageTables(SQLiteDatabase db, String tablePrefix) {
+            String tableName = (tablePrefix != null) ?
+                    tablePrefix+TABLE_IN_MEMORY_MESSAGES : TABLE_IN_MEMORY_MESSAGES;
+
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+                    "_id INTEGER PRIMARY KEY," +
+                    "thread_id INTEGER," +
+                    "nickname TEXT," +
+                    "body TEXT," +
+                    "date INTEGER," +    // in millisec
+                    "type INTEGER," +
+                    "packet_id TEXT UNIQUE," +
+                    "err_code INTEGER NOT NULL DEFAULT 0," +
+                    "err_msg TEXT," +
+                    "is_muc INTEGER" +
+                    ");");
+
+        }
+
         @Override
         public void onOpen(SQLiteDatabase db) {
             if (db.isReadOnly()) {
@@ -563,6 +594,9 @@ public class ImProvider extends ContentProvider {
             if (!MAKE_MESSAGE_PRESENCE_CHAT_PERSISTENT) {
                 createMessageChatTables(db, cpDbName);
             }
+
+            // in-memory message table
+            createInMemoryMessageTables(db, cpDbName);
 
             // presence
             db.execSQL("CREATE TABLE IF NOT EXISTS " + cpDbName + TABLE_PRESENCE + " ("+
@@ -758,6 +792,24 @@ public class ImProvider extends ContentProvider {
         sMessagesProjectionMap.put(Im.Contacts.PROVIDER, "contacts.provider AS provider");
         sMessagesProjectionMap.put(Im.Contacts.ACCOUNT, "contacts.account AS account");
         sMessagesProjectionMap.put("contact_type", "contacts.type AS contact_type");
+
+        sInMemoryMessagesProjectionMap = new HashMap<String, String>();
+        sInMemoryMessagesProjectionMap.put(Im.Messages._ID, "inMemoryMessages._id AS _id");
+        sInMemoryMessagesProjectionMap.put(Im.Messages._COUNT, "COUNT(*) AS _count");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.THREAD_ID, "inMemoryMessages.thread_id AS thread_id");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.PACKET_ID, "inMemoryMessages.packet_id AS packet_id");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.NICKNAME, "inMemoryMessages.nickname AS nickname");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.BODY, "inMemoryMessages.body AS body");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.DATE, "inMemoryMessages.date AS date");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.TYPE, "inMemoryMessages.type AS type");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.ERROR_CODE, "inMemoryMessages.err_code AS err_code");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.ERROR_MESSAGE, "inMemoryMessages.err_msg AS err_msg");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.IS_GROUP_CHAT, "inMemoryMessages.is_muc AS is_muc");
+        // contacts columns
+        sInMemoryMessagesProjectionMap.put(Im.Messages.CONTACT, "contacts.username AS contact");
+        sInMemoryMessagesProjectionMap.put(Im.Contacts.PROVIDER, "contacts.provider AS provider");
+        sInMemoryMessagesProjectionMap.put(Im.Contacts.ACCOUNT, "contacts.account AS account");
+        sInMemoryMessagesProjectionMap.put("contact_type", "contacts.type AS contact_type");
     }
 
     public ImProvider() {
@@ -809,13 +861,17 @@ public class ImProvider extends ContentProvider {
         mUrlMatcher.addURI(authority, "messagesByAcctAndContact/#/*", MATCH_MESSAGES_BY_CONTACT);
         mUrlMatcher.addURI(authority, "messagesByThreadId/#", MATCH_MESSAGES_BY_THREAD_ID);
         mUrlMatcher.addURI(authority, "messagesByProvider/#", MATCH_MESSAGES_BY_PROVIDER);
+        mUrlMatcher.addURI(authority, "messagesByAccount/#", MATCH_MESSAGES_BY_ACCOUNT);
         mUrlMatcher.addURI(authority, "messages/#", MATCH_MESSAGE);
 
-        mUrlMatcher.addURI(authority, "groupMessages", MATCH_GROUP_MESSAGES);
-        mUrlMatcher.addURI(authority, "groupMessagesByThreadId/#",
-                MATCH_GROUP_MESSAGE_BY_THREAD_ID);
-        mUrlMatcher.addURI(authority, "groupMessages/#", MATCH_GROUP_MESSAGE);
-        
+        mUrlMatcher.addURI(authority, "otrMessages", MATCH_OTR_MESSAGES);
+        mUrlMatcher.addURI(authority, "otrMessagesByAcctAndContact/#/*",
+                MATCH_OTR_MESSAGES_BY_CONTACT);
+        mUrlMatcher.addURI(authority, "otrMessagesByThreadId/#", MATCH_OTR_MESSAGES_BY_THREAD_ID);
+        mUrlMatcher.addURI(authority, "otrMessagesByProvider/#", MATCH_OTR_MESSAGES_BY_PROVIDER);
+        mUrlMatcher.addURI(authority, "otrMessagesByAccount/#", MATCH_OTR_MESSAGES_BY_ACCOUNT);
+        mUrlMatcher.addURI(authority, "otrMessages/#", MATCH_OTR_MESSAGE);
+
         mUrlMatcher.addURI(authority, "groupMembers", MATCH_GROUP_MEMBERS);
         mUrlMatcher.addURI(authority, "groupMembers/#", MATCH_GROUP_MEMBERS_BY_GROUP);
 
@@ -1068,9 +1124,35 @@ public class ImProvider extends ContentProvider {
                 appendWhere(whereClause, "_id", "=", url.getPathSegments().get(1));
                 break;
 
+            case MATCH_MESSAGES_BY_THREAD_ID:
+                appendWhere(whereClause, Im.Messages.THREAD_ID, "=", url.getPathSegments().get(1));
+                // fall thru.
+
             case MATCH_MESSAGES:
-                qb.setTables(MESSAGE_JOIN_CONTACT_TABLE);
-                qb.setProjectionMap(sMessagesProjectionMap);
+                qb.setTables(TABLE_MESSAGES);
+
+                final String selectionClause = whereClause.toString();
+                final String query1 = qb.buildQuery(projectionIn, selectionClause,
+                        null, null, null, null, null /* limit */);
+
+                // Build the second query for frequent
+                qb = new SQLiteQueryBuilder();
+                qb.setTables(TABLE_IN_MEMORY_MESSAGES);
+                final String query2 = qb.buildQuery(projectionIn,
+                        selectionClause, null, null, null, null, null /* limit */);
+
+                // Put them together
+                final String query = qb.buildUnionQuery(new String[] {query1, query2}, sort, null);
+                final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                Cursor c = db.rawQueryWithFactory(null, query, null, TABLE_MESSAGES);
+                if ((c != null) && !isTemporary()) {
+                    c.setNotificationUri(getContext().getContentResolver(), url);
+                }
+                return c;
+
+            case MATCH_MESSAGE:
+                qb.setTables(TABLE_MESSAGES);
+                appendWhere(whereClause, Im.Messages._ID, "=", url.getPathSegments().get(1));
                 break;
 
             case MATCH_MESSAGES_BY_CONTACT:
@@ -1080,35 +1162,24 @@ public class ImProvider extends ContentProvider {
                 appendWhere(whereClause, Im.Contacts.ACCOUNT, "=", url.getPathSegments().get(1));
                 appendWhere(whereClause, "contacts.username", "=",
                         decodeURLSegment(url.getPathSegments().get(2)));
-                break;
 
-            case MATCH_MESSAGES_BY_THREAD_ID:
-                qb.setTables(MESSAGE_JOIN_CONTACT_TABLE);
-                qb.setProjectionMap(sMessagesProjectionMap);
-                appendWhere(whereClause, Im.Messages.THREAD_ID, "=", url.getPathSegments().get(1));
-                break;
+                final String sel = whereClause.toString();
+                final String q1 = qb.buildQuery(projectionIn, sel, null, null, null, null, null);
 
-            case MATCH_MESSAGE:
-                qb.setTables(MESSAGE_JOIN_CONTACT_TABLE);
-                qb.setProjectionMap(sMessagesProjectionMap);
-                appendWhere(whereClause, Im.Messages._ID, "=", url.getPathSegments().get(1));
-                break;
+                // Build the second query for frequent
+                qb = new SQLiteQueryBuilder();
+                qb.setTables(IN_MEMORY_MESSAGES_JOIN_CONTACT_TABLE);
+                qb.setProjectionMap(sInMemoryMessagesProjectionMap);
+                final String q2 = qb.buildQuery(projectionIn, sel, null, null, null, null, null);
 
-            case MATCH_GROUP_MESSAGES:
-                qb.setTables(TABLE_MESSAGES);
-                appendWhere(whereClause, Im.Messages.IS_GROUP_CHAT, "=", 1);
-                break;
-
-            case MATCH_GROUP_MESSAGE_BY_THREAD_ID:
-                qb.setTables(TABLE_MESSAGES);
-                appendWhere(whereClause, Im.Messages.IS_GROUP_CHAT, "=", 1);
-                appendWhere(whereClause, Im.Messages.THREAD_ID, "=", url.getPathSegments().get(1));
-                break;
-
-            case MATCH_GROUP_MESSAGE:
-                qb.setTables(TABLE_MESSAGES);
-                appendWhere(whereClause, Im.Messages._ID, "=", url.getPathSegments().get(1));
-                break;
+                // Put them together
+                final String q3 = qb.buildUnionQuery(new String[] {q1, q2}, sort, null);
+                final SQLiteDatabase db2 = mOpenHelper.getWritableDatabase();
+                Cursor c2 = db2.rawQueryWithFactory(null, q3, null, MESSAGE_JOIN_CONTACT_TABLE);
+                if ((c2 != null) && !isTemporary()) {
+                    c2.setNotificationUri(getContext().getContentResolver(), url);
+                }
+                return c2;
 
             case MATCH_INVITATIONS:
                 qb.setTables(TABLE_INVITATIONS);
@@ -1292,17 +1363,17 @@ public class ImProvider extends ContentProvider {
             case MATCH_MESSAGES_BY_CONTACT:
             case MATCH_MESSAGES_BY_THREAD_ID:
             case MATCH_MESSAGES_BY_PROVIDER:
+            case MATCH_MESSAGES_BY_ACCOUNT:
+            case MATCH_OTR_MESSAGES:
+            case MATCH_OTR_MESSAGES_BY_CONTACT:
+            case MATCH_OTR_MESSAGES_BY_THREAD_ID:
+            case MATCH_OTR_MESSAGES_BY_PROVIDER:
+            case MATCH_OTR_MESSAGES_BY_ACCOUNT:
                 return Im.Messages.CONTENT_TYPE;
 
             case MATCH_MESSAGE:
+            case MATCH_OTR_MESSAGE:
                 return Im.Messages.CONTENT_ITEM_TYPE;
-
-            case MATCH_GROUP_MESSAGES:
-            case MATCH_GROUP_MESSAGE_BY_THREAD_ID:
-                return Im.Messages.GROUP_CHAT_CONTENT_TYPE;
-
-            case MATCH_GROUP_MESSAGE:
-                return Im.Messages.GROUP_CHAT_CONTENT_ITEM_TYPE;
 
             case MATCH_PRESENCE:
             case MATCH_PRESENCE_BULK:
@@ -1830,13 +1901,18 @@ public class ImProvider extends ContentProvider {
         return sum;
     }
 
-    public Uri insertInternal(Uri url, ContentValues initialValues) {
+    private Uri insertInternal(Uri url, ContentValues initialValues) {
         Uri resultUri = null;
         long rowID = 0;
+        long account = 0;
+        String contact = null;
+        long threadId = 0;
+
         boolean notifyContactListContentUri = false;
         boolean notifyContactContentUri = false;
         boolean notifyMessagesContentUri = false;
-        boolean notifyGroupMessagesContentUri = false;
+        boolean notifyMessagesByContactContentUri = false;
+        boolean notifyMessagesByThreadIdContentUri = false;
         boolean notifyProviderAccountContentUri = false;
 
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -1921,7 +1997,16 @@ public class ImProvider extends ContentProvider {
                 break;
 
             case MATCH_MESSAGES_BY_CONTACT:
-                appendValuesFromMessageByContactUrl(db, initialValues, url);
+                String accountStr = decodeURLSegment(url.getPathSegments().get(1));
+                try {
+                    account = Long.parseLong(accountStr);
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException();
+                }
+
+                contact = decodeURLSegment(url.getPathSegments().get(2));
+                initialValues.put(Im.Messages.THREAD_ID, getContactId(db, accountStr, contact));
+
                 notifyMessagesContentUri = true;
 
                 // Insert into the messages table.
@@ -1938,6 +2023,7 @@ public class ImProvider extends ContentProvider {
 
             case MATCH_MESSAGES:
                 // Insert into the messages table.
+                notifyMessagesContentUri = true;
                 rowID = db.insert(TABLE_MESSAGES, "thread_id", initialValues);
                 if (rowID > 0) {
                     resultUri = Uri.parse(Im.Messages.CONTENT_URI + "/" + rowID);
@@ -1945,18 +2031,47 @@ public class ImProvider extends ContentProvider {
 
                 break;
 
-            case MATCH_GROUP_MESSAGE_BY_THREAD_ID:
-                appendValuesFromUrl(initialValues, url, Im.Messages.THREAD_ID);
-                notifyGroupMessagesContentUri = true;
+            case MATCH_OTR_MESSAGES_BY_CONTACT:
+                String accountStr2 = decodeURLSegment(url.getPathSegments().get(1));
+
+                try {
+                    account = Long.parseLong(accountStr2);
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException();
+                }
+
+                contact = decodeURLSegment(url.getPathSegments().get(2));
+                initialValues.put(Im.Messages.THREAD_ID, getContactId(db, accountStr2, contact));
+
+                notifyMessagesByContactContentUri = true;
+
+                // Insert into the in-memory messages table.
+                rowID = db.insert(TABLE_IN_MEMORY_MESSAGES, "thread_id", initialValues);
+                if (rowID > 0) {
+                    resultUri = Uri.parse(Im.Messages.OTR_MESSAGES_CONTENT_URI + "/" + rowID);
+                }
+
+                break;
+
+            case MATCH_OTR_MESSAGES_BY_THREAD_ID:
+                try {
+                    threadId = Long.parseLong(decodeURLSegment(url.getPathSegments().get(1)));
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException();
+                }
+                
+                initialValues.put(Im.Messages.THREAD_ID, threadId);
+
+                notifyMessagesByThreadIdContentUri = true;
                 // fall through
 
-            case MATCH_GROUP_MESSAGES:
-                initialValues.put(Im.Messages.IS_GROUP_CHAT, 1);
-
-                rowID = db.insert(TABLE_MESSAGES, "thread_id", initialValues);
+            case MATCH_OTR_MESSAGES:
+                // Insert into the messages table.
+                rowID = db.insert(TABLE_IN_MEMORY_MESSAGES, "thread_id", initialValues);
                 if (rowID > 0) {
-                    resultUri = Uri.parse(Im.Messages.GROUP_CHAT_CONTENT_URI + "/" + rowID);
+                    resultUri = Uri.parse(Im.Messages.OTR_MESSAGES_CONTENT_URI + "/" + rowID);
                 }
+
                 break;
 
             case MATCH_INVITATIONS:
@@ -2092,14 +2207,19 @@ public class ImProvider extends ContentProvider {
                 resolver.notifyChange(Im.Messages.CONTENT_URI, null);
             }
 
-            if (notifyGroupMessagesContentUri) {
-                resolver.notifyChange(Im.Messages.GROUP_CHAT_CONTENT_URI, null);
+            if (notifyMessagesByContactContentUri) {
+                resolver.notifyChange(Im.Messages.CONTENT_URI, null);
+                resolver.notifyChange(Im.Messages.getContentUriByContact(account, contact), null);
+            }
+
+            if (notifyMessagesByThreadIdContentUri) {
+                resolver.notifyChange(Im.Messages.CONTENT_URI, null);
+                resolver.notifyChange(Im.Messages.getContentUriByThreadId(threadId), null);
             }
 
             if (notifyProviderAccountContentUri) {
                 if (DBG) log("notify insert for " + Im.Provider.CONTENT_URI_WITH_ACCOUNT);
-                resolver.notifyChange(Im.Provider.CONTENT_URI_WITH_ACCOUNT,
-                        null);
+                resolver.notifyChange(Im.Provider.CONTENT_URI_WITH_ACCOUNT, null);
             }
         }
         return resultUri;
@@ -2115,15 +2235,6 @@ public class ImProvider extends ContentProvider {
             }
             values.put(columns[i], decodeURLSegment(url.getPathSegments().get(i + 1)));
         }
-    }
-
-    private void appendValuesFromMessageByContactUrl(final SQLiteDatabase db,
-                                                     ContentValues values,
-                                                     final Uri url) {
-        String account = decodeURLSegment(url.getPathSegments().get(1));
-        String contact = decodeURLSegment(url.getPathSegments().get(2));
-        long contactId = getContactId(db, account, contact);
-        values.put(Im.Messages.THREAD_ID, contactId);
     }
 
     private long getContactId(final SQLiteDatabase db,
@@ -2308,7 +2419,7 @@ public class ImProvider extends ContentProvider {
         if (DBG) log("deleteWithSelection: deleted " + count + " rows");
     }
 
-    private String getContactByProviderSelection(String providerId) {
+    private String buildThreadIdSelection(String contactSelection) {
         StringBuilder buf = new StringBuilder();
 
         buf.append(Im.Messages.THREAD_ID);
@@ -2317,18 +2428,21 @@ public class ImProvider extends ContentProvider {
         buf.append(" from ");
         buf.append(TABLE_CONTACTS);
         buf.append(" where ");
-        buf.append(Im.Contacts.PROVIDER);
-        buf.append(" = '");
-        buf.append(providerId);
+        buf.append(contactSelection);
         buf.append("')");
 
         return buf.toString();
     }
 
-    public int deleteInternal(Uri url, String userWhere, String[] whereArgs) {
+     private int deleteInternal(Uri url, String userWhere, String[] whereArgs) {
         String tableToChange;
         String idColumnName = null;
         String changedItemId = null;
+        String provider = null;
+        String accountStr = null;
+        long account = 0;
+        String contact = null;
+        long threadId = 0;
 
         StringBuilder whereClause = new StringBuilder();
         if(userWhere != null) {
@@ -2336,7 +2450,8 @@ public class ImProvider extends ContentProvider {
         }
 
         boolean notifyMessagesContentUri = false;
-        boolean notifyGroupMessagesContentUri = false;
+        boolean notifyMessagesByContactContentUri = false;
+        boolean notifyMessagesByThreadIdContentUri = false;
         boolean notifyContactListContentUri = false;
         boolean notifyProviderAccountContentUri = false;
         int match = mUrlMatcher.match(url);
@@ -2383,6 +2498,7 @@ public class ImProvider extends ContentProvider {
                 try {
                     deletedContactId = Long.parseLong(changedItemId);
                 } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException();
                 }
 
                 contactDeleted = true;
@@ -2433,10 +2549,16 @@ public class ImProvider extends ContentProvider {
             case MATCH_MESSAGES_BY_CONTACT:
                 tableToChange = TABLE_MESSAGES;
 
-                String account = decodeURLSegment(url.getPathSegments().get(1));
-                String contact = decodeURLSegment(url.getPathSegments().get(2));
+                accountStr = decodeURLSegment(url.getPathSegments().get(1));
+                try {
+                    account = Long.parseLong(accountStr);
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException();
+                }
+                
+                contact = decodeURLSegment(url.getPathSegments().get(2));
                 appendWhere(whereClause, Im.Messages.THREAD_ID, "=",
-                        getContactId(db, account, contact));
+                        getContactId(db, accountStr, contact));
 
                 notifyMessagesContentUri = true;
                 break;
@@ -2444,7 +2566,12 @@ public class ImProvider extends ContentProvider {
             case MATCH_MESSAGES_BY_THREAD_ID:
                 tableToChange = TABLE_MESSAGES;
 
-                String threadId = decodeURLSegment(url.getPathSegments().get(1));
+                try {
+                    threadId = Long.parseLong(decodeURLSegment(url.getPathSegments().get(1)));
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException();
+                }
+                
                 appendWhere(whereClause, Im.Messages.THREAD_ID, "=", threadId);
 
                 notifyMessagesContentUri = true;
@@ -2453,11 +2580,19 @@ public class ImProvider extends ContentProvider {
             case MATCH_MESSAGES_BY_PROVIDER:
                 tableToChange = TABLE_MESSAGES;
 
-                String provider = decodeURLSegment(url.getPathSegments().get(1));
-                String extraSelection = getContactByProviderSelection(provider);
+                provider = decodeURLSegment(url.getPathSegments().get(1));
+                appendWhere(whereClause, buildThreadIdSelection(
+                        Im.Contacts.PROVIDER + '=' + provider));
 
-                if (DBG) log("delete messages by provider selection: " + extraSelection);
-                appendWhere(whereClause, extraSelection);
+                notifyMessagesContentUri = true;
+                break;
+
+            case MATCH_MESSAGES_BY_ACCOUNT:
+                tableToChange = TABLE_MESSAGES;
+
+                accountStr = decodeURLSegment(url.getPathSegments().get(1));
+                appendWhere(whereClause, buildThreadIdSelection(
+                        Im.Contacts.ACCOUNT + '=' + accountStr));
 
                 notifyMessagesContentUri = true;
                 break;
@@ -2468,24 +2603,65 @@ public class ImProvider extends ContentProvider {
                 notifyMessagesContentUri = true;
                 break;
 
-            case MATCH_GROUP_MESSAGES:
-                tableToChange = TABLE_MESSAGES;
-                appendWhere(whereClause, Im.Messages.IS_GROUP_CHAT, "=", 1);
+            case MATCH_OTR_MESSAGES:
+                tableToChange = TABLE_IN_MEMORY_MESSAGES;
                 break;
 
-            case MATCH_GROUP_MESSAGE_BY_THREAD_ID:
-                tableToChange = TABLE_MESSAGES;
-                appendWhere(whereClause, Im.Messages.IS_GROUP_CHAT, "=", 1);
+            case MATCH_OTR_MESSAGES_BY_CONTACT:
+                tableToChange = TABLE_IN_MEMORY_MESSAGES;
 
-                changedItemId = url.getPathSegments().get(1);
-                idColumnName = Im.Messages.THREAD_ID;
-                notifyGroupMessagesContentUri = true;
+                accountStr = decodeURLSegment(url.getPathSegments().get(1));
+                try {
+                    account = Long.parseLong(accountStr);
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException();
+                }
+
+                contact = decodeURLSegment(url.getPathSegments().get(2));
+                appendWhere(whereClause, Im.Messages.THREAD_ID, "=",
+                        getContactId(db, accountStr, contact));
+
+                notifyMessagesByContactContentUri = true;
                 break;
 
-            case MATCH_GROUP_MESSAGE:
-                tableToChange = TABLE_MESSAGES;
+            case MATCH_OTR_MESSAGES_BY_THREAD_ID:
+                tableToChange = TABLE_IN_MEMORY_MESSAGES;
+
+                try {
+                    threadId = Long.parseLong(decodeURLSegment(url.getPathSegments().get(1)));
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException();
+                }
+
+                appendWhere(whereClause, Im.Messages.THREAD_ID, "=", threadId);
+
+                notifyMessagesByThreadIdContentUri = true;
+                break;
+
+            case MATCH_OTR_MESSAGES_BY_PROVIDER:
+                tableToChange = TABLE_IN_MEMORY_MESSAGES;
+
+                provider = decodeURLSegment(url.getPathSegments().get(1));
+                appendWhere(whereClause, buildThreadIdSelection(
+                        Im.Contacts.PROVIDER + '=' + provider));
+
+                notifyMessagesContentUri = true;
+                break;
+
+            case MATCH_OTR_MESSAGES_BY_ACCOUNT:
+                tableToChange = TABLE_IN_MEMORY_MESSAGES;
+
+                accountStr = decodeURLSegment(url.getPathSegments().get(1));
+                appendWhere(whereClause, buildThreadIdSelection(
+                        Im.Contacts.ACCOUNT + '=' + accountStr));
+
+                notifyMessagesContentUri = true;
+                break;
+
+            case MATCH_OTR_MESSAGE:
+                tableToChange = TABLE_IN_MEMORY_MESSAGES;
                 changedItemId = url.getPathSegments().get(1);
-                notifyGroupMessagesContentUri = true;
+                notifyMessagesContentUri = true;
                 break;
 
             case MATCH_GROUP_MEMBERS:
@@ -2643,23 +2819,37 @@ public class ImProvider extends ContentProvider {
         }
 
         if (count > 0) {
+            ContentResolver resolver = getContext().getContentResolver();
+
             // In most case, we query contacts with presence and chats joined, thus
             // we should also notify that contacts changes when presence or chats changed.
             if (match == MATCH_CHATS || match == MATCH_CHATS_ID
                     || match == MATCH_PRESENCE || match == MATCH_PRESENCE_ID
                     || match == MATCH_CONTACTS_BAREBONE) {
-                getContext().getContentResolver().notifyChange(Im.Contacts.CONTENT_URI, null);
-            } else if (notifyMessagesContentUri) {
-                getContext().getContentResolver().notifyChange(Im.Messages.CONTENT_URI, null);
-            } else if (notifyGroupMessagesContentUri) {
-                getContext().getContentResolver().notifyChange(
-                        Im.Messages.GROUP_CHAT_CONTENT_URI, null);
-            } else if (notifyContactListContentUri) {
-                getContext().getContentResolver().notifyChange(Im.ContactList.CONTENT_URI, null);
-            } else if (notifyProviderAccountContentUri) {
+                resolver.notifyChange(Im.Contacts.CONTENT_URI, null);
+            }
+
+            if (notifyMessagesContentUri) {
+                resolver.notifyChange(Im.Messages.CONTENT_URI, null);
+            }
+
+            if (notifyMessagesByContactContentUri) {
+                resolver.notifyChange(Im.Messages.CONTENT_URI, null);
+                resolver.notifyChange(Im.Messages.getContentUriByContact(account, contact), null);
+            }
+
+            if (notifyMessagesByThreadIdContentUri) {
+                resolver.notifyChange(Im.Messages.CONTENT_URI, null);
+                resolver.notifyChange(Im.Messages.getContentUriByThreadId(threadId), null);
+            }
+
+            if (notifyContactListContentUri) {
+                resolver.notifyChange(Im.ContactList.CONTENT_URI, null);
+            }
+
+            if (notifyProviderAccountContentUri) {
                 if (DBG) log("notify delete for " + Im.Provider.CONTENT_URI_WITH_ACCOUNT);
-                getContext().getContentResolver().notifyChange(Im.Provider.CONTENT_URI_WITH_ACCOUNT,
-                        null);
+                resolver.notifyChange(Im.Provider.CONTENT_URI_WITH_ACCOUNT, null);
             }
             
             if (backfillQuickSwitchSlots) {
@@ -2670,11 +2860,15 @@ public class ImProvider extends ContentProvider {
         return count;
     }
 
-    public int updateInternal(Uri url, ContentValues values, String userWhere,
+    private int updateInternal(Uri url, ContentValues values, String userWhere,
             String[] whereArgs) {
         String tableToChange;
         String idColumnName = null;
         String changedItemId = null;
+        String accountStr = null;
+        long account = 0;
+        String contact = null;
+        long threadId = 0;
         int count;
 
         StringBuilder whereClause = new StringBuilder();
@@ -2683,7 +2877,8 @@ public class ImProvider extends ContentProvider {
         }
 
         boolean notifyMessagesContentUri = false;
-        boolean notifyGroupMessagesContentUri = false;
+        boolean notifyMessagesByContactContentUri = false;
+        boolean notifyMessagesByThreadIdContentUri = false;
         boolean notifyContactListContentUri = false;
         boolean notifyProviderAccountContentUri = false;
 
@@ -2763,10 +2958,16 @@ public class ImProvider extends ContentProvider {
             case MATCH_MESSAGES_BY_CONTACT:
                 tableToChange = TABLE_MESSAGES;
 
-                String account = decodeURLSegment(url.getPathSegments().get(1));
-                String contact = decodeURLSegment(url.getPathSegments().get(2));
+                accountStr = decodeURLSegment(url.getPathSegments().get(1));
+                try {
+                    account = Long.parseLong(accountStr);
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException();
+                }
+
+                contact = decodeURLSegment(url.getPathSegments().get(2));
                 appendWhere(whereClause, Im.Messages.THREAD_ID, "=",
-                        getContactId(db, account, contact));
+                        getContactId(db, accountStr, contact));
 
                 notifyMessagesContentUri = true;
                 break;
@@ -2774,7 +2975,12 @@ public class ImProvider extends ContentProvider {
             case MATCH_MESSAGES_BY_THREAD_ID:
                 tableToChange = TABLE_MESSAGES;
 
-                String threadId = decodeURLSegment(url.getPathSegments().get(1));
+                try {
+                    threadId = Long.parseLong(decodeURLSegment(url.getPathSegments().get(1)));
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException();
+                }
+
                 appendWhere(whereClause, Im.Messages.THREAD_ID, "=", threadId);
 
                 notifyMessagesContentUri = true;
@@ -2786,24 +2992,45 @@ public class ImProvider extends ContentProvider {
                 notifyMessagesContentUri = true;
                 break;
 
-            case MATCH_GROUP_MESSAGES:
-                tableToChange = TABLE_MESSAGES;
-                appendWhere(whereClause, Im.Messages.IS_GROUP_CHAT, "=", 1);
+            case MATCH_OTR_MESSAGES:
+                tableToChange = TABLE_IN_MEMORY_MESSAGES;
                 break;
 
-            case MATCH_GROUP_MESSAGE_BY_THREAD_ID:
-                tableToChange = TABLE_MESSAGES;
-                appendWhere(whereClause, Im.Messages.IS_GROUP_CHAT, "=", 1);
+            case MATCH_OTR_MESSAGES_BY_CONTACT:
+                tableToChange = TABLE_IN_MEMORY_MESSAGES;
 
-                changedItemId = url.getPathSegments().get(1);
-                idColumnName = Im.Messages.THREAD_ID;
-                notifyGroupMessagesContentUri = true;
+                accountStr = decodeURLSegment(url.getPathSegments().get(1));
+                try {
+                    account = Long.parseLong(accountStr);
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException();
+                }
+
+                contact = decodeURLSegment(url.getPathSegments().get(2));
+                appendWhere(whereClause, Im.Messages.THREAD_ID, "=",
+                        getContactId(db, accountStr, contact));
+
+                notifyMessagesByContactContentUri = true;
                 break;
 
-            case MATCH_GROUP_MESSAGE:
-                tableToChange = TABLE_MESSAGES;
+            case MATCH_OTR_MESSAGES_BY_THREAD_ID:
+                tableToChange = TABLE_IN_MEMORY_MESSAGES;
+
+                try {
+                    threadId = Long.parseLong(decodeURLSegment(url.getPathSegments().get(1)));
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException();
+                }
+
+                appendWhere(whereClause, Im.Messages.THREAD_ID, "=", threadId);
+
+                notifyMessagesByThreadIdContentUri = true;
+                break;
+
+            case MATCH_OTR_MESSAGE:
+                tableToChange = TABLE_IN_MEMORY_MESSAGES;
                 changedItemId = url.getPathSegments().get(1);
-                notifyGroupMessagesContentUri = true;
+                notifyMessagesContentUri = true;
                 break;
 
             case MATCH_AVATARS:
@@ -2902,24 +3129,38 @@ public class ImProvider extends ContentProvider {
         count = db.update(tableToChange, values, whereClause.toString(), whereArgs);
 
         if (count > 0) {
+            ContentResolver resolver = getContext().getContentResolver();
+
             // In most case, we query contacts with presence and chats joined, thus
             // we should also notify that contacts changes when presence or chats changed.
             if (match == MATCH_CHATS || match == MATCH_CHATS_ID
                     || match == MATCH_PRESENCE || match == MATCH_PRESENCE_ID
                     || match == MATCH_CONTACTS_BAREBONE) {
-                getContext().getContentResolver().notifyChange(Im.Contacts.CONTENT_URI, null);
-            } else if (notifyMessagesContentUri) {
+                resolver.notifyChange(Im.Contacts.CONTENT_URI, null);
+            }
+
+            if (notifyMessagesContentUri) {
                 if (DBG) log("notify change for " + Im.Messages.CONTENT_URI);
-                getContext().getContentResolver().notifyChange(Im.Messages.CONTENT_URI, null);
-            } else if (notifyGroupMessagesContentUri) {
-                getContext().getContentResolver().notifyChange(
-                        Im.Messages.GROUP_CHAT_CONTENT_URI, null);
-            } else if (notifyContactListContentUri) {
-                getContext().getContentResolver().notifyChange(Im.ContactList.CONTENT_URI, null);
-            } else if (notifyProviderAccountContentUri) {
+                resolver.notifyChange(Im.Messages.CONTENT_URI, null);
+            }
+
+            if (notifyMessagesByContactContentUri) {
+                resolver.notifyChange(Im.Messages.CONTENT_URI, null);
+                resolver.notifyChange(Im.Messages.getContentUriByContact(account, contact), null);
+            }
+
+            if (notifyMessagesByThreadIdContentUri) {
+                resolver.notifyChange(Im.Messages.CONTENT_URI, null);
+                resolver.notifyChange(Im.Messages.getContentUriByThreadId(threadId), null);
+            }
+
+            if (notifyContactListContentUri) {
+                resolver.notifyChange(Im.ContactList.CONTENT_URI, null);
+            }
+
+            if (notifyProviderAccountContentUri) {
                 if (DBG) log("notify change for " + Im.Provider.CONTENT_URI_WITH_ACCOUNT);
-                getContext().getContentResolver().notifyChange(Im.Provider.CONTENT_URI_WITH_ACCOUNT,
-                        null);
+                resolver.notifyChange(Im.Provider.CONTENT_URI_WITH_ACCOUNT, null);
             }
         }
 
