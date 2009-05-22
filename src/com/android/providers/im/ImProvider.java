@@ -2419,17 +2419,17 @@ public class ImProvider extends ContentProvider {
         if (DBG) log("deleteWithSelection: deleted " + count + " rows");
     }
 
-    private String buildThreadIdSelection(String contactSelection) {
+    private String buildContactIdSelection(String columnName, String contactSelection) {
         StringBuilder buf = new StringBuilder();
 
-        buf.append(Im.Messages.THREAD_ID);
+        buf.append(columnName);
         buf.append(" in (select ");
         buf.append(Im.Contacts._ID);
         buf.append(" from ");
         buf.append(TABLE_CONTACTS);
         buf.append(" where ");
         buf.append(contactSelection);
-        buf.append("')");
+        buf.append(")");
 
         return buf.toString();
     }
@@ -2581,8 +2581,8 @@ public class ImProvider extends ContentProvider {
                 tableToChange = TABLE_MESSAGES;
 
                 provider = decodeURLSegment(url.getPathSegments().get(1));
-                appendWhere(whereClause, buildThreadIdSelection(
-                        Im.Contacts.PROVIDER + '=' + provider));
+                appendWhere(whereClause, buildContactIdSelection(Im.Messages.THREAD_ID,
+                        Im.Contacts.PROVIDER + "='" + provider + "'"));
 
                 notifyMessagesContentUri = true;
                 break;
@@ -2591,8 +2591,8 @@ public class ImProvider extends ContentProvider {
                 tableToChange = TABLE_MESSAGES;
 
                 accountStr = decodeURLSegment(url.getPathSegments().get(1));
-                appendWhere(whereClause, buildThreadIdSelection(
-                        Im.Contacts.ACCOUNT + '=' + accountStr));
+                appendWhere(whereClause, buildContactIdSelection(Im.Messages.THREAD_ID,
+                        Im.Contacts.ACCOUNT + "='" + accountStr + "'"));
 
                 notifyMessagesContentUri = true;
                 break;
@@ -2642,9 +2642,10 @@ public class ImProvider extends ContentProvider {
                 tableToChange = TABLE_IN_MEMORY_MESSAGES;
 
                 provider = decodeURLSegment(url.getPathSegments().get(1));
-                appendWhere(whereClause, buildThreadIdSelection(
-                        Im.Contacts.PROVIDER + '=' + provider));
+                appendWhere(whereClause, buildContactIdSelection(Im.Messages.THREAD_ID,
+                        Im.Contacts.PROVIDER + "='" + provider + "'"));
 
+                if (DBG) log("delete (MATCH_OTR_MESSAGES_BY_PROVIDER) sel => " + whereClause);
                 notifyMessagesContentUri = true;
                 break;
 
@@ -2652,9 +2653,10 @@ public class ImProvider extends ContentProvider {
                 tableToChange = TABLE_IN_MEMORY_MESSAGES;
 
                 accountStr = decodeURLSegment(url.getPathSegments().get(1));
-                appendWhere(whereClause, buildThreadIdSelection(
-                        Im.Contacts.ACCOUNT + '=' + accountStr));
+                appendWhere(whereClause, buildContactIdSelection(Im.Messages.THREAD_ID,
+                        Im.Contacts.ACCOUNT + "='" + accountStr + "'"));
 
+                if (DBG) log("delete (MATCH_OTR_MESSAGES_BY_ACCOUNT) sel => " + whereClause);
                 notifyMessagesContentUri = true;
                 break;
 
@@ -2705,23 +2707,12 @@ public class ImProvider extends ContentProvider {
             case MATCH_CHATS_BY_ACCOUNT:
                 tableToChange = TABLE_CHATS;
 
-                if (whereClause.length() > 0) {
-                    whereClause.append(" AND ");
-                }
-                whereClause.append(Im.Chats.CONTACT_ID);
-                whereClause.append(" in (select ");
-                whereClause.append(Im.Contacts._ID);
-                whereClause.append(" from ");
-                whereClause.append(TABLE_CONTACTS);
-                whereClause.append(" where ");
-                whereClause.append(Im.Contacts.ACCOUNT);
-                whereClause.append("='");
-                whereClause.append(url.getLastPathSegment());
-                whereClause.append("')");
+                accountStr = decodeURLSegment(url.getLastPathSegment());
+                appendWhere(whereClause, buildContactIdSelection(Im.Chats.CONTACT_ID,
+                        Im.Contacts.ACCOUNT + "='" + accountStr + "'"));
 
-                if (DBG) log("deleteInternal (MATCH_CHATS_BY_ACCOUNT): sel => " +
-                        whereClause.toString());
-
+                if (DBG) log("delete (MATCH_CHATS_BY_ACCOUNT) sel => " + whereClause);
+                
                 changedItemId = null;
                 break;
 
@@ -2744,23 +2735,11 @@ public class ImProvider extends ContentProvider {
             case MATCH_PRESENCE_BY_ACCOUNT:
                 tableToChange = TABLE_PRESENCE;
 
-                if (whereClause.length() > 0) {
-                    whereClause.append(" AND ");
-                }
-                whereClause.append(Im.Presence.CONTACT_ID);
-                whereClause.append(" in (select ");
-                whereClause.append(Im.Contacts._ID);
-                whereClause.append(" from ");
-                whereClause.append(TABLE_CONTACTS);
-                whereClause.append(" where ");
-                whereClause.append(Im.Contacts.ACCOUNT);
-                whereClause.append("='");
-                whereClause.append(url.getLastPathSegment());
-                whereClause.append("')");
+                accountStr = decodeURLSegment(url.getLastPathSegment());
+                appendWhere(whereClause, buildContactIdSelection(Im.Presence.CONTACT_ID,
+                        Im.Contacts.ACCOUNT + "='" + accountStr + "'"));
 
-                if (DBG) log("deleteInternal (MATCH_PRESENCE_BY_ACCOUNT): sel => " +
-                        whereClause.toString());
-
+                if (DBG) log("delete (MATCH_PRESENCE_BY_ACCOUNT): sel => " + whereClause);
                 changedItemId = null;
                 break;
 
