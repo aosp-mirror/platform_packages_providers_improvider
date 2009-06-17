@@ -14,3 +14,6 @@ LOCAL_PACKAGE_NAME := ImProvider
 LOCAL_CERTIFICATE := shared
 
 include $(BUILD_PACKAGE)
+
+# additionally, build sub-tests in a separate .apk
+include $(call all-makefiles-under,$(LOCAL_PATH))
