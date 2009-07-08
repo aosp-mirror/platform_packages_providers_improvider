@@ -21,5 +21,5 @@
      for different hardware and product builds. -->
 <resources>
     <!-- Flag indicating whether IM app should be shown in the application tray -->
-    <bool name="enableLandingPageActivity">true</bool>
+    <bool name="enableLandingPageActivity">false</bool>
 </resources>
