@@ -25,9 +25,9 @@
     <string name="menu_edit_account">"编辑帐户"</string>
     <string name="menu_remove_account">"删除帐户"</string>
     <string name="sign_in">"登录"</string>
-    <string name="menu_sign_out">"登出"</string>
+    <string name="menu_sign_out">"退出"</string>
     <string name="menu_settings">"设置"</string>
-    <string name="menu_sign_out_all">"全部登出"</string>
+    <string name="menu_sign_out_all">"全部退出"</string>
     <string name="choose_account_title">"聊天 - 选择一个帐户"</string>
     <!-- no translation found for conversations (6809253595345281731) -->
     <skip />

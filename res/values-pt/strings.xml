@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="ro_perm_label">"ler mensagens instantâneas"</string>
+    <string name="ro_perm_desc">"Permite que os aplicativos leiam os dados do provedor de conteúdo de mensagem instantânea."</string>
+    <string name="wo_perm_label">"gravar mensagens instantâneas"</string>
+    <string name="wo_perm_desc">"Permite que os aplicativos gravem os dados no provedor de conteúdo de mensagem instantânea."</string>
+    <string name="im_label">"Mensagem instantânea"</string>
+    <string name="landing_page_title">"Bate-papo - Selecione uma conta"</string>
+    <string name="menu_add_account">"Adicionar conta"</string>
+    <string name="menu_edit_account">"Editar conta"</string>
+    <string name="menu_remove_account">"Remover conta"</string>
+    <string name="sign_in">"Fazer login"</string>
+    <string name="menu_sign_out">"Sair"</string>
+    <string name="menu_settings">"Configurações"</string>
+    <string name="menu_sign_out_all">"Sair de todos"</string>
+    <string name="choose_account_title">"Bate-papo - Selecione uma conta"</string>
+    <string name="conversations">"(%1$d)"</string>
+    <string name="add_account">"Adicionar conta <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <string name="menu_view_contact_list">"Lista de contatos"</string>
+    <string name="signing_in_wait">"Fazendo login..."</string>
+</resources>

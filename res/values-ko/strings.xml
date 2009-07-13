@@ -16,10 +16,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ro_perm_label">"인스턴트 메시지 읽기"</string>
-    <string name="ro_perm_desc">"채팅 콘텐츠 제공업체에서 제공한 데이터를 읽을 수 있는 권한을 응용프로그램에 부여합니다."</string>
+    <string name="ro_perm_desc">"응용프로그램이 메신저 콘텐츠 제공업체에서 제공한 데이터를 읽을 수 있도록 합니다."</string>
     <string name="wo_perm_label">"인스턴트 메시지 쓰기"</string>
-    <string name="wo_perm_desc">"채팅 콘텐츠 제공업체에 데이터를 쓸 수 있는 권한을 응용프로그램에 부여합니다."</string>
-    <string name="im_label">"채팅"</string>
+    <string name="wo_perm_desc">"응용프로그램이 메신저 콘텐츠 제공업체에 데이터를 쓸 수 있도록 합니다."</string>
+    <string name="im_label">"메신저"</string>
     <string name="landing_page_title">"채팅 - 계정 선택"</string>
     <string name="menu_add_account">"계정 추가"</string>
     <string name="menu_edit_account">"계정 수정"</string>
