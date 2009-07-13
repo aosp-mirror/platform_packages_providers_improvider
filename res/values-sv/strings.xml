@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="ro_perm_label">"läsa chattmeddelanden"</string>
+    <string name="ro_perm_desc">"Tillåter att ett program läser data från chattens innehållsleverantör."</string>
+    <string name="wo_perm_label">"skriva chattmeddelanden"</string>
+    <string name="wo_perm_desc">"Tillåter att ett program skriver data till innehållsleverantören för chatten."</string>
+    <string name="im_label">"Chatt"</string>
+    <string name="landing_page_title">"Chatt – välj ett konto"</string>
+    <string name="menu_add_account">"Lägg till konto"</string>
+    <string name="menu_edit_account">"Redigera konto"</string>
+    <string name="menu_remove_account">"Ta bort konto"</string>
+    <string name="sign_in">"Logga in"</string>
+    <string name="menu_sign_out">"Logga ut"</string>
+    <string name="menu_settings">"Inställningar"</string>
+    <string name="menu_sign_out_all">"Logga ut från alla"</string>
+    <string name="choose_account_title">"Chatt – Välj ett konto"</string>
+    <string name="conversations">"(%1$d)"</string>
+    <string name="add_account">"Lägg till kontot <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <string name="menu_view_contact_list">"Kontaktlista"</string>
+    <string name="signing_in_wait">"Loggar in…"</string>
+</resources>
