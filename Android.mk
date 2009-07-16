@@ -3,7 +3,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := user
 
-LOCAL_SRC_FILES := $(call all-subdir-java-files)
+LOCAL_SRC_FILES :=  $(call all-java-files-under,src)
 
 LOCAL_JAVA_LIBRARIES := ext \
                         com.android.im.plugin           # TODO: remove this and load this on demand.
