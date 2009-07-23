@@ -183,7 +183,7 @@ public class ImProvider extends ContentProvider {
     private static final String IN_MEMORY_MESSAGES_JOIN_CONTACT_TABLE =
             "inMemoryMessages LEFT OUTER JOIN contacts ON " +
                 "(contacts._id = inMemoryMessages.thread_id)";
-    
+
     /**
      * The where clause for filtering out blocked contacts
      */
@@ -333,7 +333,7 @@ public class ImProvider extends ContentProvider {
                 case 43:    // this is the db version shipped in Dream 1.0
                     // no-op: no schema changed from 43 to 44. The db version was changed to flush
                     // old provider settings, so new provider setting (including new name/value
-                    // pairs) could be inserted by the plugins. 
+                    // pairs) could be inserted by the plugins.
 
                     // follow thru.
                 case 44:
@@ -465,7 +465,7 @@ public class ImProvider extends ContentProvider {
 
             // Off the record status
             buf.append("otr INTEGER");
-            
+
             buf.append(");");
 
             db.execSQL(buf.toString());
@@ -1325,7 +1325,7 @@ public class ImProvider extends ContentProvider {
 
             case MATCH_PROVIDERS_BY_ID:
                 return Im.Provider.CONTENT_ITEM_TYPE;
-            
+
             case MATCH_ACCOUNTS:
                 return Im.Account.CONTENT_TYPE;
 
@@ -1422,7 +1422,7 @@ public class ImProvider extends ContentProvider {
     // package scope for testing.
     boolean insertBulkContacts(ContentValues values) {
         //if (DBG) log("insertBulkContacts: begin");
-        
+
         ArrayList<String> usernames = values.getStringArrayList(Im.Contacts.USERNAME);
         ArrayList<String> nicknames = values.getStringArrayList(Im.Contacts.NICKNAME);
         int usernameCount = usernames.size();
@@ -1442,7 +1442,7 @@ public class ImProvider extends ContentProvider {
         ArrayList<String> quickContactArray = values.getStringArrayList(Im.Contacts.QUICK_CONTACT);
         ArrayList<String> rejectedArray = values.getStringArrayList(Im.Contacts.REJECTED);
         int sum = 0;
-            
+
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
         db.beginTransaction();
@@ -1517,7 +1517,7 @@ public class ImProvider extends ContentProvider {
                     rowId = db.insertOrThrow(TABLE_CONTACTS, USERNAME, contactValues);
                 } catch (android.database.sqlite.SQLiteConstraintException ex) {
                     if (DBG) log("insertBulkContacts: insert " + username + " caught " + ex);
-                    
+
                     // append username to the selection clause
                     updateSelection.delete(0, updateSelection.length());
                     updateSelection.append(Im.Contacts.USERNAME);
@@ -1547,7 +1547,7 @@ public class ImProvider extends ContentProvider {
                         Log.w(LOG_TAG, "insertBulkContacts: seeding presence caught " + ex);
                     }
                 }
-                
+
                 // yield the lock if anyone else is trying to
                 // perform a db operation here.
                 db.yieldIfContended();
@@ -2059,7 +2059,7 @@ public class ImProvider extends ContentProvider {
                 } catch (NumberFormatException ex) {
                     throw new IllegalArgumentException();
                 }
-                
+
                 initialValues.put(Im.Messages.THREAD_ID, threadId);
 
                 notifyMessagesByThreadIdContentUri = true;
@@ -2293,14 +2293,14 @@ public class ImProvider extends ContentProvider {
             if (c.getCount() < 1) {
                 return;
             }
-        
+
             int slot = findEmptyQuickSwitchSlot();
-        
+
             if (slot != -1) {
                 c.moveToFirst();
-            
+
                 long id = c.getLong(c.getColumnIndex(Im.Chats._ID));
-            
+
                 updateSlotForChat(id, slot);
             }
         } finally {
@@ -2310,9 +2310,9 @@ public class ImProvider extends ContentProvider {
 
     private int updateSlotForChat(long chatId, int slot) {
         ContentValues values = new ContentValues();
-        
+
         values.put(Im.Chats.SHORTCUT, slot);
-        
+
         return update(Im.Chats.CONTENT_URI, values, Im.Chats._ID + "=?",
             new String[] { Long.toString(chatId) });
     }
@@ -2329,7 +2329,7 @@ public class ImProvider extends ContentProvider {
 
             int slots = 0;
             int column = c.getColumnIndex(Im.Chats.SHORTCUT);
-            
+
             //  The map is here because numbers go from 0-9, but we want to assign slots in
             //  0, 9, 8, ..., 1 order to match the right-to-left reading of the number row
             //  on the keyboard.
@@ -2342,7 +2342,7 @@ public class ImProvider extends ContentProvider {
             //  shortcuts into an ordinal bit position in the 'slots' bitfield.
             for (c.moveToFirst(); ! c.isAfterLast(); c.moveToNext()) {
                 int slot = c.getInt(column);
-                
+
                 if (slot != -1) {
                     slots |= (1 << map[slot]);
                 }
@@ -2357,7 +2357,7 @@ public class ImProvider extends ContentProvider {
                     return map[i];
                 }
             }
-            
+
             return -1;
         } finally {
             c.close();
@@ -2436,6 +2436,11 @@ public class ImProvider extends ContentProvider {
 
      private int deleteInternal(Uri url, String userWhere, String[] whereArgs) {
         String tableToChange;
+
+        // In some cases a given url requires that we delete rows from more than one
+        // table.  The motivating example is deleting messages from both the on disk
+        // and in memory messages tables.
+        String tableToChange2 = null;
         String idColumnName = null;
         String changedItemId = null;
         String provider = null;
@@ -2460,7 +2465,7 @@ public class ImProvider extends ContentProvider {
         long deletedContactId = 0;
 
         boolean backfillQuickSwitchSlots = false;
-        
+
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
         switch (match) {
@@ -2548,6 +2553,7 @@ public class ImProvider extends ContentProvider {
 
             case MATCH_MESSAGES_BY_CONTACT:
                 tableToChange = TABLE_MESSAGES;
+                tableToChange2 = TABLE_IN_MEMORY_MESSAGES;
 
                 accountStr = decodeURLSegment(url.getPathSegments().get(1));
                 try {
@@ -2555,7 +2561,7 @@ public class ImProvider extends ContentProvider {
                 } catch (NumberFormatException ex) {
                     throw new IllegalArgumentException();
                 }
-                
+
                 contact = decodeURLSegment(url.getPathSegments().get(2));
                 appendWhere(whereClause, Im.Messages.THREAD_ID, "=",
                         getContactId(db, accountStr, contact));
@@ -2565,13 +2571,14 @@ public class ImProvider extends ContentProvider {
 
             case MATCH_MESSAGES_BY_THREAD_ID:
                 tableToChange = TABLE_MESSAGES;
+                tableToChange2 = TABLE_IN_MEMORY_MESSAGES;
 
                 try {
                     threadId = Long.parseLong(decodeURLSegment(url.getPathSegments().get(1)));
                 } catch (NumberFormatException ex) {
                     throw new IllegalArgumentException();
                 }
-                
+
                 appendWhere(whereClause, Im.Messages.THREAD_ID, "=", threadId);
 
                 notifyMessagesContentUri = true;
@@ -2712,7 +2719,7 @@ public class ImProvider extends ContentProvider {
                         Im.Contacts.ACCOUNT + "='" + accountStr + "'"));
 
                 if (DBG) log("delete (MATCH_CHATS_BY_ACCOUNT) sel => " + whereClause);
-                
+
                 changedItemId = null;
                 break;
 
@@ -2791,6 +2798,11 @@ public class ImProvider extends ContentProvider {
 
         int count = db.delete(tableToChange, whereClause.toString(), whereArgs);
 
+        // see the comment at the declaration of tableToChange2 for an explanation
+        if (tableToChange2 != null){
+            count += db.delete(tableToChange2, whereClause.toString(), whereArgs);
+        }
+
         if (contactDeleted && count > 0) {
             // since the contact cleanup triggers no longer work for cross database tables,
             // we have to do it by hand here.
@@ -2830,7 +2842,7 @@ public class ImProvider extends ContentProvider {
                 if (DBG) log("notify delete for " + Im.Provider.CONTENT_URI_WITH_ACCOUNT);
                 resolver.notifyChange(Im.Provider.CONTENT_URI_WITH_ACCOUNT, null);
             }
-            
+
             if (backfillQuickSwitchSlots) {
                 backfillQuickSwitchSlots();
             }
