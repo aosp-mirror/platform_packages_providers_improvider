@@ -15,11 +15,11 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ro_perm_label">"odczytaj wiadomości czatu"</string>
-    <string name="ro_perm_desc">"Zezwala aplikacjom na odczytywanie danych od dostawcy zawartości czatu."</string>
-    <string name="wo_perm_label">"zapisz wiadomości czatu"</string>
-    <string name="wo_perm_desc">"Zezwala aplikacjom na zapisywanie danych do dostawcy zawartości czatu."</string>
-    <string name="im_label">"Czat"</string>
+    <string name="ro_perm_label">"odczytaj wiadomości komunikatora"</string>
+    <string name="ro_perm_desc">"Zezwalaj aplikacjom na odczytywanie danych dostawcy zawartości komunikatora"</string>
+    <string name="wo_perm_label">"zapisz wiadomości komunikatora"</string>
+    <string name="wo_perm_desc">"Zezwalaj aplikacjom na zapisywanie danych do dostawcy zawartości komunikatora"</string>
+    <string name="im_label">"Komunikator"</string>
     <string name="landing_page_title">"Czat: Wybierz konto"</string>
     <string name="menu_add_account">"Dodaj konto"</string>
     <string name="menu_edit_account">"Edytuj konto"</string>

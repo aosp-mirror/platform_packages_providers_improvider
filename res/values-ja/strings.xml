@@ -16,9 +16,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ro_perm_label">"インスタントメッセージを表示"</string>
-    <string name="ro_perm_desc">"IMコンテンツプロバイダーからのデータ読み取りをアプリケーションに許可します。"</string>
+    <string name="ro_perm_desc">"アプリケーションでIMコンテンツプロバイダからデータを読み取れるようにします。"</string>
     <string name="wo_perm_label">"インスタントメッセージを作成"</string>
-    <string name="wo_perm_desc">"IMコンテンツプロバイダーからのデータ書き込みをアプリケーションに許可します。"</string>
+    <string name="wo_perm_desc">"アプリケーションからIMコンテンツプロバイダにデータを書き込めるようにします。"</string>
     <string name="im_label">"チャット"</string>
     <string name="landing_page_title">"チャット: アカウントを選択"</string>
     <string name="menu_add_account">"アカウントを追加"</string>

@@ -15,9 +15,9 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ro_perm_label">"Chat-Nachrichten lesen"</string>
+    <string name="ro_perm_label">"Instant Messages lesen"</string>
     <string name="ro_perm_desc">"Ermöglicht Anwendungen das Lesen von Daten des IM-Content-Providers."</string>
-    <string name="wo_perm_label">"Chat-Nachrichten verfassen"</string>
+    <string name="wo_perm_label">"Instant Messages verfassen"</string>
     <string name="wo_perm_desc">"Ermöglicht Anwendungen das Schreiben von Daten an den IM-Content-Provider."</string>
     <string name="im_label">"IM"</string>
     <string name="landing_page_title">"Chat - Konto auswählen"</string>
