@@ -16,7 +16,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ro_perm_label">"читать мгновенные сообщения"</string>
-    <string name="ro_perm_desc">"Позволяет приложениям считавать данные через поставщика чата."</string>
+    <string name="ro_perm_desc">"Позволяет приложениям считывать данные через поставщика чата."</string>
     <string name="wo_perm_label">"писать мгновенные сообщения"</string>
     <string name="wo_perm_desc">"Позволяет приложениям записывать данные через поставщика чата."</string>
     <string name="im_label">"Чат"</string>
