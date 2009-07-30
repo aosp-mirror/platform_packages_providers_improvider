@@ -68,13 +68,17 @@ public class ImProvider extends ContentProvider {
     private static final String TABLE_SESSION_COOKIES = "sessionCookies";
     private static final String TABLE_MESSAGES = "messages";
     private static final String TABLE_IN_MEMORY_MESSAGES = "inMemoryMessages";
-    private static final String TABLE_OUTGOING_RMQ_MESSAGES = "outgoingRmqMessages";
-    private static final String TABLE_LAST_RMQ_ID = "lastrmqid";
     private static final String TABLE_ACCOUNT_STATUS = "accountStatus";
     private static final String TABLE_BRANDING_RESOURCE_MAP_CACHE = "brandingResMapCache";
 
+    // tables for mcs and rmq
+    private static final String TABLE_OUTGOING_RMQ_MESSAGES = "outgoingRmqMessages";
+    private static final String TABLE_LAST_RMQ_ID = "lastrmqid";
+    private static final String TABLE_S2D_RMQ_IDS = "s2dRmqIds";
+
+
     private static final String DATABASE_NAME = "im.db";
-    private static final int DATABASE_VERSION = 50;
+    private static final int DATABASE_VERSION = 51;
 
     protected static final int MATCH_PROVIDERS = 1;
     protected static final int MATCH_PROVIDERS_BY_ID = 2;
@@ -135,13 +139,16 @@ public class ImProvider extends ContentProvider {
     protected static final int MATCH_PROVIDER_SETTINGS_BY_ID_AND_NAME = 92;
     protected static final int MATCH_INVITATIONS = 100;
     protected static final int MATCH_INVITATION  = 101;
-    protected static final int MATCH_OUTGOING_RMQ_MESSAGES = 110;
-    protected static final int MATCH_OUTGOING_RMQ_MESSAGE = 111;
-    protected static final int MATCH_OUTGOING_HIGHEST_RMQ_ID = 112;
-    protected static final int MATCH_LAST_RMQ_ID = 113;
-    protected static final int MATCH_ACCOUNTS_STATUS = 114;
-    protected static final int MATCH_ACCOUNT_STATUS = 115;
-    protected static final int MATCH_BRANDING_RESOURCE_MAP_CACHE = 120;
+    protected static final int MATCH_ACCOUNTS_STATUS = 104;
+    protected static final int MATCH_ACCOUNT_STATUS = 105;
+    protected static final int MATCH_BRANDING_RESOURCE_MAP_CACHE = 106;
+
+    // mcs url matcher
+    protected static final int MATCH_OUTGOING_RMQ_MESSAGES = 200;
+    protected static final int MATCH_OUTGOING_RMQ_MESSAGE = 201;
+    protected static final int MATCH_OUTGOING_HIGHEST_RMQ_ID = 202;
+    protected static final int MATCH_LAST_RMQ_ID = 203;
+    protected static final int MATCH_S2D_RMQ_IDS = 204;
 
 
     protected final UriMatcher mUrlMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -289,19 +296,6 @@ public class ImProvider extends ContentProvider {
                     "UNIQUE (provider, name)" +
                     ");");
 
-            db.execSQL("create TABLE " + TABLE_OUTGOING_RMQ_MESSAGES + " (" +
-                    "_id INTEGER PRIMARY KEY," +
-                    "rmq_id INTEGER," +
-                    "type INTEGER," +
-                    "ts INTEGER," +
-                    "data TEXT" +
-                    ");");
-
-            db.execSQL("create TABLE " + TABLE_LAST_RMQ_ID + " (" +
-                    "_id INTEGER PRIMARY KEY," +
-                    "rmq_id INTEGER" +
-                    ");");
-
             db.execSQL("create TABLE " + TABLE_BRANDING_RESOURCE_MAP_CACHE + " (" +
                     "_id INTEGER PRIMARY KEY," +
                     "provider_id INTEGER," +
@@ -323,6 +317,25 @@ public class ImProvider extends ContentProvider {
                     " BEGIN " +
                         "DELETE FROM " + TABLE_PROVIDER_SETTINGS + " WHERE provider= OLD._id;" +
                     "END");
+
+            // the following are tables for mcs
+            db.execSQL("create TABLE " + TABLE_OUTGOING_RMQ_MESSAGES + " (" +
+                    "_id INTEGER PRIMARY KEY," +
+                    "rmq_id INTEGER," +
+                    "type INTEGER," +
+                    "ts INTEGER," +
+                    "data TEXT" +
+                    ");");
+
+            db.execSQL("create TABLE " + TABLE_LAST_RMQ_ID + " (" +
+                    "_id INTEGER PRIMARY KEY," +
+                    "rmq_id INTEGER" +
+                    ");");
+
+            db.execSQL("create TABLE " + TABLE_S2D_RMQ_IDS + " (" +
+                    "_id INTEGER PRIMARY KEY," +
+                    "rmq_id INTEGER" +
+                    ");");
         }
 
         @Override
@@ -414,7 +427,30 @@ public class ImProvider extends ContentProvider {
                         }
                     }
 
+                case 48:
+                case 49:
+                case 50:
+                    if (newVersion <= 50) {
+                        return;
+                    }
+
+                    db.beginTransaction();
+                    try {
+                        // add rmq2 s2d ids table
+                        db.execSQL("create TABLE " + TABLE_S2D_RMQ_IDS + " (" +
+                                "_id INTEGER PRIMARY KEY," +
+                                "rmq_id INTEGER" +
+                                ");");
+                        db.setTransactionSuccessful();
+                    } catch (Throwable ex) {
+                        Log.e(LOG_TAG, ex.getMessage(), ex);
+                        break; // force to destroy all old data;
+                    } finally {
+                        db.endTransaction();
+                    }
+
                     return;
+
             }
 
             Log.w(LOG_TAG, "Couldn't upgrade db to " + newVersion + ". Destroying old data.");
@@ -430,9 +466,12 @@ public class ImProvider extends ContentProvider {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTACTS_ETAG);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_AVATARS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROVIDER_SETTINGS);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_BRANDING_RESOURCE_MAP_CACHE);
+
+            // mcs/rmq stuff
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_OUTGOING_RMQ_MESSAGES);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_LAST_RMQ_ID);
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_BRANDING_RESOURCE_MAP_CACHE);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_S2D_RMQ_IDS);
         }
 
         private void createContactsTables(SQLiteDatabase db) {
@@ -813,15 +852,19 @@ public class ImProvider extends ContentProvider {
     }
 
     public ImProvider() {
-        this(AUTHORITY, DATABASE_NAME, DATABASE_VERSION);
+        this(DATABASE_NAME, DATABASE_VERSION);
+
+        setupImUrlMatchers(AUTHORITY);
+        setupMcsUrlMatchers(AUTHORITY);
     }
 
-    protected ImProvider(String authority, String dbName, int dbVersion) {
+    protected ImProvider(String dbName, int dbVersion) {
         mDatabaseName = dbName;
         mDatabaseVersion = dbVersion;
-
         mTransientDbName = "transient_" + dbName.replace(".", "_");
+    }
 
+    private void setupImUrlMatchers(String authority) {
         mUrlMatcher.addURI(authority, "providers", MATCH_PROVIDERS);
         mUrlMatcher.addURI(authority, "providers/#", MATCH_PROVIDERS_BY_ID);
         mUrlMatcher.addURI(authority, "providers/account", MATCH_PROVIDERS_WITH_ACCOUNT);
@@ -892,15 +935,18 @@ public class ImProvider extends ContentProvider {
         mUrlMatcher.addURI(authority, "invitations", MATCH_INVITATIONS);
         mUrlMatcher.addURI(authority, "invitations/#", MATCH_INVITATION);
 
-        mUrlMatcher.addURI(authority, "outgoingRmqMessages", MATCH_OUTGOING_RMQ_MESSAGES);
-        mUrlMatcher.addURI(authority, "outgoingRmqMessages/#", MATCH_OUTGOING_RMQ_MESSAGE);
-        mUrlMatcher.addURI(authority, "outgoingHighestRmqId", MATCH_OUTGOING_HIGHEST_RMQ_ID);
-        mUrlMatcher.addURI(authority, "lastRmqId", MATCH_LAST_RMQ_ID);
-
         mUrlMatcher.addURI(authority, "accountStatus", MATCH_ACCOUNTS_STATUS);
         mUrlMatcher.addURI(authority, "accountStatus/#", MATCH_ACCOUNT_STATUS);
 
         mUrlMatcher.addURI(authority, "brandingResMapCache", MATCH_BRANDING_RESOURCE_MAP_CACHE);
+    }
+
+    private void setupMcsUrlMatchers(String authority) {
+        mUrlMatcher.addURI(authority, "outgoingRmqMessages", MATCH_OUTGOING_RMQ_MESSAGES);
+        mUrlMatcher.addURI(authority, "outgoingRmqMessages/#", MATCH_OUTGOING_RMQ_MESSAGE);
+        mUrlMatcher.addURI(authority, "outgoingHighestRmqId", MATCH_OUTGOING_HIGHEST_RMQ_ID);
+        mUrlMatcher.addURI(authority, "lastRmqId", MATCH_LAST_RMQ_ID);
+        mUrlMatcher.addURI(authority, "s2dids", MATCH_S2D_RMQ_IDS);
     }
 
     @Override
@@ -1245,6 +1291,21 @@ public class ImProvider extends ContentProvider {
                 qb.setTables(TABLE_PROVIDER_SETTINGS);
                 break;
 
+            case MATCH_ACCOUNTS_STATUS:
+                qb.setTables(TABLE_ACCOUNT_STATUS);
+                break;
+
+            case MATCH_ACCOUNT_STATUS:
+                qb.setTables(TABLE_ACCOUNT_STATUS);
+                appendWhere(whereClause, Im.AccountStatus.ACCOUNT, "=",
+                        url.getPathSegments().get(1));
+                break;
+
+            case MATCH_BRANDING_RESOURCE_MAP_CACHE:
+                qb.setTables(TABLE_BRANDING_RESOURCE_MAP_CACHE);
+                break;
+
+            // mcs and rmq queries
             case MATCH_OUTGOING_RMQ_MESSAGES:
                 qb.setTables(TABLE_OUTGOING_RMQ_MESSAGES);
                 break;
@@ -1260,18 +1321,8 @@ public class ImProvider extends ContentProvider {
                 limit = "1";
                 break;
 
-            case MATCH_ACCOUNTS_STATUS:
-                qb.setTables(TABLE_ACCOUNT_STATUS);
-                break;
-
-            case MATCH_ACCOUNT_STATUS:
-                qb.setTables(TABLE_ACCOUNT_STATUS);
-                appendWhere(whereClause, Im.AccountStatus.ACCOUNT, "=",
-                        url.getPathSegments().get(1));
-                break;
-
-            case MATCH_BRANDING_RESOURCE_MAP_CACHE:
-                qb.setTables(TABLE_BRANDING_RESOURCE_MAP_CACHE);
+            case MATCH_S2D_RMQ_IDS:
+                qb.setTables(TABLE_S2D_RMQ_IDS);
                 break;
 
             default:
@@ -2156,6 +2207,22 @@ public class ImProvider extends ContentProvider {
                 }
                 break;
 
+            case MATCH_ACCOUNTS_STATUS:
+                rowID = db.replace(TABLE_ACCOUNT_STATUS, null, initialValues);
+                if (rowID > 0) {
+                    resultUri = Uri.parse(Im.AccountStatus.CONTENT_URI + "/" + rowID);
+                }
+                notifyProviderAccountContentUri = true;
+                break;
+
+            case MATCH_BRANDING_RESOURCE_MAP_CACHE:
+                rowID = db.insert(TABLE_BRANDING_RESOURCE_MAP_CACHE, null, initialValues);
+                if (rowID > 0) {
+                    resultUri = Uri.parse(Im.BrandingResourceMapCache.CONTENT_URI + "/" + rowID);
+                }
+                break;
+
+            // mcs/rmq stuff
             case MATCH_OUTGOING_RMQ_MESSAGES:
                 rowID = db.insert(TABLE_OUTGOING_RMQ_MESSAGES, null, initialValues);
                 if (rowID > 0) {
@@ -2170,18 +2237,10 @@ public class ImProvider extends ContentProvider {
                 }
                 break;
 
-            case MATCH_ACCOUNTS_STATUS:
-                rowID = db.replace(TABLE_ACCOUNT_STATUS, null, initialValues);
+            case MATCH_S2D_RMQ_IDS:
+                rowID = db.insert(TABLE_S2D_RMQ_IDS, null, initialValues);
                 if (rowID > 0) {
-                    resultUri = Uri.parse(Im.AccountStatus.CONTENT_URI + "/" + rowID);
-                }
-                notifyProviderAccountContentUri = true;
-                break;
-
-            case MATCH_BRANDING_RESOURCE_MAP_CACHE:
-                rowID = db.insert(TABLE_BRANDING_RESOURCE_MAP_CACHE, null, initialValues);
-                if (rowID > 0) {
-                    resultUri = Uri.parse(Im.BrandingResourceMapCache.CONTENT_URI + "/" + rowID);
+                    resultUri = Uri.parse(Im.ServerToDeviceRmqIds.CONTENT_URI + "/" + rowID);
                 }
                 break;
 
@@ -2770,6 +2829,11 @@ public class ImProvider extends ContentProvider {
                 appendWhere(whereClause, Im.ProviderSettings.NAME, "=", name);
                 break;
 
+            case MATCH_BRANDING_RESOURCE_MAP_CACHE:
+                tableToChange = TABLE_BRANDING_RESOURCE_MAP_CACHE;
+                break;
+
+            // mcs/rmq stuff
             case MATCH_OUTGOING_RMQ_MESSAGES:
                 tableToChange = TABLE_OUTGOING_RMQ_MESSAGES;
                 break;
@@ -2778,8 +2842,8 @@ public class ImProvider extends ContentProvider {
                 tableToChange = TABLE_LAST_RMQ_ID;
                 break;
 
-            case MATCH_BRANDING_RESOURCE_MAP_CACHE:
-                tableToChange = TABLE_BRANDING_RESOURCE_MAP_CACHE;
+            case MATCH_S2D_RMQ_IDS:
+                tableToChange = TABLE_S2D_RMQ_IDS;
                 break;
 
             default:
@@ -3102,6 +3166,10 @@ public class ImProvider extends ContentProvider {
 
             case MATCH_LAST_RMQ_ID:
                 tableToChange = TABLE_LAST_RMQ_ID;
+                break;
+
+            case MATCH_S2D_RMQ_IDS:
+                tableToChange = TABLE_S2D_RMQ_IDS;
                 break;
 
             default:
