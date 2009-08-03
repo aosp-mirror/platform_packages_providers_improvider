@@ -15,22 +15,22 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ro_perm_label">"ανάγνωση άμεσων μηνυμάτων"</string>
-    <string name="ro_perm_desc">"Επιτρέπει στις εφαρμογές την ανάγνωση δεδομένων από τον πάροχο περιεχομένου ανταλλαγής άμεσων μηνυμάτων (IM)."</string>
-    <string name="wo_perm_label">"εγγραφή άμεσων μηνυμάτων"</string>
-    <string name="wo_perm_desc">"Επιτρέπει στις εφαρμογές την εγγραφή δεδομένων από τον πάροχο περιεχομένου ανταλλαγής άμεσων μηνυμάτων (IM)."</string>
-    <string name="im_label">"Ανταλλαγή άμεσων μηνυμάτων (IM)"</string>
-    <string name="landing_page_title">"Συζήτηση - Επιλογή λογαριασμού"</string>
-    <string name="menu_add_account">"Προσθήκη λογαριασμού"</string>
-    <string name="menu_edit_account">"Επεξεργασία λογαριασμού"</string>
-    <string name="menu_remove_account">"Κατάργηση λογαριασμού"</string>
-    <string name="sign_in">"Σύνδεση"</string>
-    <string name="menu_sign_out">"Αποσύνδεση"</string>
-    <string name="menu_settings">"Ρυθμίσεις"</string>
-    <string name="menu_sign_out_all">"Αποσύνδεση όλων"</string>
-    <string name="choose_account_title">"Συζήτηση - Επιλογή λογαριασμού"</string>
-    <string name="conversations">"(%1$d)"</string>
-    <string name="add_account">"Προσθήκη λογαριασμού <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
-    <string name="menu_view_contact_list">"Λίστα επαφών"</string>
-    <string name="signing_in_wait">"Σύνδεση..."</string>
+    <string name="ro_perm_label" msgid="8923213594676670163">"ανάγνωση άμεσων μηνυμάτων"</string>
+    <string name="ro_perm_desc" msgid="6154703403388711809">"Επιτρέπει στις εφαρμογές την ανάγνωση δεδομένων από τον πάροχο περιεχομένου ανταλλαγής άμεσων μηνυμάτων (IM)."</string>
+    <string name="wo_perm_label" msgid="4771652386754813294">"εγγραφή άμεσων μηνυμάτων"</string>
+    <string name="wo_perm_desc" msgid="470416777693330370">"Επιτρέπει στις εφαρμογές την εγγραφή δεδομένων από τον πάροχο περιεχομένου ανταλλαγής άμεσων μηνυμάτων (IM)."</string>
+    <string name="im_label" msgid="5040064040105432386">"Ανταλ.άμεσων μην.(IM)"</string>
+    <string name="landing_page_title" msgid="2177721703095999384">"Συζήτηση - Επιλογή λογαριασμού"</string>
+    <string name="menu_add_account" msgid="4184762314855405486">"Προσθήκη λογαριασμού"</string>
+    <string name="menu_edit_account" msgid="6585077522972888350">"Επεξεργασία λογαριασμού"</string>
+    <string name="menu_remove_account" msgid="8013513817623405880">"Κατάργηση λογαριασμού"</string>
+    <string name="sign_in" msgid="8420453507342456753">"Σύνδεση"</string>
+    <string name="menu_sign_out" msgid="2737051932405259853">"Αποσύνδεση"</string>
+    <string name="menu_settings" msgid="590956137301210916">"Ρυθμίσεις"</string>
+    <string name="menu_sign_out_all" msgid="945106187701517280">"Αποσύνδεση όλων"</string>
+    <string name="choose_account_title" msgid="3179220583433723296">"Συζήτηση - Επιλογή λογαριασμού"</string>
+    <string name="conversations" msgid="6809253595345281731">"(%1$d)"</string>
+    <string name="add_account" msgid="3793076059089010851">"Προσθήκη λογαριασμού <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <string name="menu_view_contact_list" msgid="4703362007911835460">"Λίστα επαφών"</string>
+    <string name="signing_in_wait" msgid="8262004726366994582">"Σύνδεση..."</string>
 </resources>

@@ -15,22 +15,22 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ro_perm_label">"anlık iletileri oku"</string>
-    <string name="ro_perm_desc">"Uygulamalara, IM içerik sağlayıcısından gelen verileri okuma izni verir."</string>
-    <string name="wo_perm_label">"anlık iletiler yazın"</string>
-    <string name="wo_perm_desc">"Uygulamaların IM içerik sağlayıcısına veri yazmasına izin verir."</string>
-    <string name="im_label">"IM"</string>
-    <string name="landing_page_title">"Sohbet - Bir hesap seçin"</string>
-    <string name="menu_add_account">"Hesap ekle"</string>
-    <string name="menu_edit_account">"Hesabı düzenle"</string>
-    <string name="menu_remove_account">"Hesabı kaldır"</string>
-    <string name="sign_in">"Oturum aç"</string>
-    <string name="menu_sign_out">"Çıkış"</string>
-    <string name="menu_settings">"Ayarlar"</string>
-    <string name="menu_sign_out_all">"Tüm hizmetlerden çık"</string>
-    <string name="choose_account_title">"Sohbet - Bir hesap seçin"</string>
-    <string name="conversations">"(%1$d)"</string>
-    <string name="add_account">"<xliff:g id="ACCOUNT">%1$s</xliff:g> hesabını ekle"</string>
-    <string name="menu_view_contact_list">"Kişi listesi"</string>
-    <string name="signing_in_wait">"Oturum açılıyor..."</string>
+    <string name="ro_perm_label" msgid="8923213594676670163">"anlık iletileri oku"</string>
+    <string name="ro_perm_desc" msgid="6154703403388711809">"Uygulamalara, IM içerik sağlayıcısından gelen verileri okuma izni verir."</string>
+    <string name="wo_perm_label" msgid="4771652386754813294">"anlık iletiler yazın"</string>
+    <string name="wo_perm_desc" msgid="470416777693330370">"Uygulamaların IM içerik sağlayıcısına veri yazmasına izin verir."</string>
+    <string name="im_label" msgid="5040064040105432386">"IM"</string>
+    <string name="landing_page_title" msgid="2177721703095999384">"Sohbet - Bir hesap seçin"</string>
+    <string name="menu_add_account" msgid="4184762314855405486">"Hesap ekle"</string>
+    <string name="menu_edit_account" msgid="6585077522972888350">"Hesabı düzenle"</string>
+    <string name="menu_remove_account" msgid="8013513817623405880">"Hesabı kaldır"</string>
+    <string name="sign_in" msgid="8420453507342456753">"Oturum aç"</string>
+    <string name="menu_sign_out" msgid="2737051932405259853">"Çıkış"</string>
+    <string name="menu_settings" msgid="590956137301210916">"Ayarlar"</string>
+    <string name="menu_sign_out_all" msgid="945106187701517280">"Tüm hizmetlerden çık"</string>
+    <string name="choose_account_title" msgid="3179220583433723296">"Sohbet - Bir hesap seçin"</string>
+    <string name="conversations" msgid="6809253595345281731">"(%1$d)"</string>
+    <string name="add_account" msgid="3793076059089010851">"<xliff:g id="ACCOUNT">%1$s</xliff:g> hesabını ekle"</string>
+    <string name="menu_view_contact_list" msgid="4703362007911835460">"Kişi listesi"</string>
+    <string name="signing_in_wait" msgid="8262004726366994582">"Oturum açılıyor..."</string>
 </resources>

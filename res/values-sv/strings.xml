@@ -15,22 +15,22 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ro_perm_label">"läsa chattmeddelanden"</string>
-    <string name="ro_perm_desc">"Tillåter att ett program läser data från chattens innehållsleverantör."</string>
-    <string name="wo_perm_label">"skriva chattmeddelanden"</string>
-    <string name="wo_perm_desc">"Tillåter att ett program skriver data till innehållsleverantören för chatten."</string>
-    <string name="im_label">"Chatt"</string>
-    <string name="landing_page_title">"Chatt – välj ett konto"</string>
-    <string name="menu_add_account">"Lägg till konto"</string>
-    <string name="menu_edit_account">"Redigera konto"</string>
-    <string name="menu_remove_account">"Ta bort konto"</string>
-    <string name="sign_in">"Logga in"</string>
-    <string name="menu_sign_out">"Logga ut"</string>
-    <string name="menu_settings">"Inställningar"</string>
-    <string name="menu_sign_out_all">"Logga ut från alla"</string>
-    <string name="choose_account_title">"Chatt – Välj ett konto"</string>
-    <string name="conversations">"(%1$d)"</string>
-    <string name="add_account">"Lägg till kontot <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
-    <string name="menu_view_contact_list">"Kontaktlista"</string>
-    <string name="signing_in_wait">"Loggar in…"</string>
+    <string name="ro_perm_label" msgid="8923213594676670163">"läsa chattmeddelanden"</string>
+    <string name="ro_perm_desc" msgid="6154703403388711809">"Tillåter att ett program läser data från chattens innehållsleverantör."</string>
+    <string name="wo_perm_label" msgid="4771652386754813294">"skriva chattmeddelanden"</string>
+    <string name="wo_perm_desc" msgid="470416777693330370">"Tillåter att ett program skriver data till innehållsleverantören för chatten."</string>
+    <string name="im_label" msgid="5040064040105432386">"Chatt"</string>
+    <string name="landing_page_title" msgid="2177721703095999384">"Chatt – välj ett konto"</string>
+    <string name="menu_add_account" msgid="4184762314855405486">"Lägg till konto"</string>
+    <string name="menu_edit_account" msgid="6585077522972888350">"Redigera konto"</string>
+    <string name="menu_remove_account" msgid="8013513817623405880">"Ta bort konto"</string>
+    <string name="sign_in" msgid="8420453507342456753">"Logga in"</string>
+    <string name="menu_sign_out" msgid="2737051932405259853">"Logga ut"</string>
+    <string name="menu_settings" msgid="590956137301210916">"Inställningar"</string>
+    <string name="menu_sign_out_all" msgid="945106187701517280">"Logga ut från alla"</string>
+    <string name="choose_account_title" msgid="3179220583433723296">"Chatt – Välj ett konto"</string>
+    <string name="conversations" msgid="6809253595345281731">"(%1$d)"</string>
+    <string name="add_account" msgid="3793076059089010851">"Lägg till kontot <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <string name="menu_view_contact_list" msgid="4703362007911835460">"Kontaktlista"</string>
+    <string name="signing_in_wait" msgid="8262004726366994582">"Loggar in…"</string>
 </resources>

@@ -15,22 +15,22 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ro_perm_label">"číst zprávy chatu"</string>
-    <string name="ro_perm_desc">"Povoluje aplikacím číst data z poskytovatele obsahu chatu."</string>
-    <string name="wo_perm_label">"chatovat"</string>
-    <string name="wo_perm_desc">"Povoluje aplikacím zapisovat data do poskytovatele obsahu chatových zpráv."</string>
-    <string name="im_label">"Chat"</string>
-    <string name="landing_page_title">"Chat – vyberte účet"</string>
-    <string name="menu_add_account">"Přidat účet"</string>
-    <string name="menu_edit_account">"Upravit účet"</string>
-    <string name="menu_remove_account">"Odstranit účet"</string>
-    <string name="sign_in">"Přihlásit se"</string>
-    <string name="menu_sign_out">"Odhlásit se"</string>
-    <string name="menu_settings">"Nastavení"</string>
-    <string name="menu_sign_out_all">"Odhlásit se ze všech služeb"</string>
-    <string name="choose_account_title">"Chat – vyberte účet"</string>
-    <string name="conversations">"(%1$d)"</string>
-    <string name="add_account">"Přidat účet <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
-    <string name="menu_view_contact_list">"Seznam kontaktů"</string>
-    <string name="signing_in_wait">"Přihlašování..."</string>
+    <string name="ro_perm_label" msgid="8923213594676670163">"číst zprávy chatu"</string>
+    <string name="ro_perm_desc" msgid="6154703403388711809">"Povoluje aplikacím číst data z poskytovatele obsahu chatu."</string>
+    <string name="wo_perm_label" msgid="4771652386754813294">"chatovat"</string>
+    <string name="wo_perm_desc" msgid="470416777693330370">"Povoluje aplikacím zapisovat data do poskytovatele obsahu chatových zpráv."</string>
+    <string name="im_label" msgid="5040064040105432386">"Chat"</string>
+    <string name="landing_page_title" msgid="2177721703095999384">"Chat – vyberte účet"</string>
+    <string name="menu_add_account" msgid="4184762314855405486">"Přidat účet"</string>
+    <string name="menu_edit_account" msgid="6585077522972888350">"Upravit účet"</string>
+    <string name="menu_remove_account" msgid="8013513817623405880">"Odstranit účet"</string>
+    <string name="sign_in" msgid="8420453507342456753">"Přihlásit se"</string>
+    <string name="menu_sign_out" msgid="2737051932405259853">"Odhlásit se"</string>
+    <string name="menu_settings" msgid="590956137301210916">"Nastavení"</string>
+    <string name="menu_sign_out_all" msgid="945106187701517280">"Odhlásit se ze všech služeb"</string>
+    <string name="choose_account_title" msgid="3179220583433723296">"Chat – vyberte účet"</string>
+    <string name="conversations" msgid="6809253595345281731">"(%1$d)"</string>
+    <string name="add_account" msgid="3793076059089010851">"Přidat účet <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <string name="menu_view_contact_list" msgid="4703362007911835460">"Seznam kontaktů"</string>
+    <string name="signing_in_wait" msgid="8262004726366994582">"Přihlašování..."</string>
 </resources>

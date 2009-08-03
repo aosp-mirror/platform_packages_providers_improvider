@@ -15,22 +15,22 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ro_perm_label">"ler mensagens instantâneas"</string>
-    <string name="ro_perm_desc">"Permite que as aplicações leiam dados a partir do fornecedor de conteúdo de MI."</string>
-    <string name="wo_perm_label">"escrever mensagens instantâneas"</string>
-    <string name="wo_perm_desc">"Permite que as aplicações escrevam dados para o fornecedor de conteúdo de MI."</string>
-    <string name="im_label">"MI"</string>
-    <string name="landing_page_title">"Chat - Seleccione uma conta"</string>
-    <string name="menu_add_account">"Adicionar conta"</string>
-    <string name="menu_edit_account">"Editar conta"</string>
-    <string name="menu_remove_account">"Remover conta"</string>
-    <string name="sign_in">"Iniciar sessão"</string>
-    <string name="menu_sign_out">"Terminar sessão"</string>
-    <string name="menu_settings">"Definições"</string>
-    <string name="menu_sign_out_all">"Terminar sessão em todos"</string>
-    <string name="choose_account_title">"Chat - Seleccionar uma conta"</string>
-    <string name="conversations">"(%1$d)"</string>
-    <string name="add_account">"Adicionar a conta <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
-    <string name="menu_view_contact_list">"Lista de contactos"</string>
-    <string name="signing_in_wait">"A iniciar sessão..."</string>
+    <string name="ro_perm_label" msgid="8923213594676670163">"ler mensagens instantâneas"</string>
+    <string name="ro_perm_desc" msgid="6154703403388711809">"Permite que as aplicações leiam dados a partir do fornecedor de conteúdo de MI."</string>
+    <string name="wo_perm_label" msgid="4771652386754813294">"escrever mensagens instantâneas"</string>
+    <string name="wo_perm_desc" msgid="470416777693330370">"Permite que as aplicações escrevam dados para o fornecedor de conteúdo de MI."</string>
+    <string name="im_label" msgid="5040064040105432386">"MI"</string>
+    <string name="landing_page_title" msgid="2177721703095999384">"Chat - Seleccione uma conta"</string>
+    <string name="menu_add_account" msgid="4184762314855405486">"Adicionar conta"</string>
+    <string name="menu_edit_account" msgid="6585077522972888350">"Editar conta"</string>
+    <string name="menu_remove_account" msgid="8013513817623405880">"Remover conta"</string>
+    <string name="sign_in" msgid="8420453507342456753">"Iniciar sessão"</string>
+    <string name="menu_sign_out" msgid="2737051932405259853">"Terminar sessão"</string>
+    <string name="menu_settings" msgid="590956137301210916">"Definições"</string>
+    <string name="menu_sign_out_all" msgid="945106187701517280">"Terminar sessão em todos"</string>
+    <string name="choose_account_title" msgid="3179220583433723296">"Chat - Seleccionar uma conta"</string>
+    <string name="conversations" msgid="6809253595345281731">"(%1$d)"</string>
+    <string name="add_account" msgid="3793076059089010851">"Adicionar a conta <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <string name="menu_view_contact_list" msgid="4703362007911835460">"Lista de contactos"</string>
+    <string name="signing_in_wait" msgid="8262004726366994582">"A iniciar sessão..."</string>
 </resources>
