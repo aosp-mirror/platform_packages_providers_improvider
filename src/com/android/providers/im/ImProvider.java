@@ -470,7 +470,7 @@ public class ImProvider extends ContentProvider {
             // across IM sessions, store the message table in memory db only)
             db.execSQL("CREATE TABLE IF NOT EXISTS " + cpDbName + TABLE_MESSAGES + " (" +
                     "_id INTEGER PRIMARY KEY," +
-                    "packet_id TEXT UNIQUE," +
+                    "packet_id TEXT," +
                     "contact TEXT," +
                     "provider INTEGER," +
                     "account INTEGER," +
@@ -515,7 +515,7 @@ public class ImProvider extends ContentProvider {
             // group chat messages
             db.execSQL("CREATE TABLE IF NOT EXISTS " + cpDbName + TABLE_GROUP_MESSAGES + " (" +
                     "_id INTEGER PRIMARY KEY," +
-                    "packet_id TEXT UNIQUE," +
+                    "packet_id TEXT," +
                     "contact TEXT," +
                     "groupId INTEGER," +
                     "body TEXT," +
