@@ -19,19 +19,4 @@
     <string name="ro_perm_desc">"Permite que las aplicaciones lean datos del proveedor de contenido de MI."</string>
     <string name="wo_perm_label">"escribir mensajes instantáneos"</string>
     <string name="wo_perm_desc">"Permite que las aplicaciones escriban datos en el proveedor de contenido de MI."</string>
-    <string name="im_label">"MI"</string>
-    <string name="landing_page_title">"Chat: seleccionar una cuenta"</string>
-    <string name="menu_add_account">"Añadir cuenta"</string>
-    <string name="menu_edit_account">"Editar cuenta"</string>
-    <string name="menu_remove_account">"Eliminar cuenta"</string>
-    <string name="sign_in">"Acceder"</string>
-    <string name="menu_sign_out">"Salir"</string>
-    <string name="menu_settings">"Configuración"</string>
-    <string name="menu_sign_out_all">"Salir de todo"</string>
-    <string name="choose_account_title">"Chat: seleccionar una cuenta"</string>
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
-    <string name="add_account">"Añadir cuenta <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
-    <string name="menu_view_contact_list">"Lista de contactos"</string>
-    <string name="signing_in_wait">"Accediendo..."</string>
 </resources>

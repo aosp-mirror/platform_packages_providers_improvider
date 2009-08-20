@@ -19,18 +19,4 @@
     <string name="ro_perm_desc">"Επιτρέπει στις εφαρμογές την ανάγνωση δεδομένων από τον πάροχο περιεχομένου ανταλλαγής άμεσων μηνυμάτων (IM)."</string>
     <string name="wo_perm_label">"εγγραφή άμεσων μηνυμάτων"</string>
     <string name="wo_perm_desc">"Επιτρέπει στις εφαρμογές την εγγραφή δεδομένων από τον πάροχο περιεχομένου ανταλλαγής άμεσων μηνυμάτων (IM)."</string>
-    <string name="im_label">"Ανταλλαγή άμεσων μηνυμάτων (IM)"</string>
-    <string name="landing_page_title">"Συζήτηση - Επιλογή λογαριασμού"</string>
-    <string name="menu_add_account">"Προσθήκη λογαριασμού"</string>
-    <string name="menu_edit_account">"Επεξεργασία λογαριασμού"</string>
-    <string name="menu_remove_account">"Κατάργηση λογαριασμού"</string>
-    <string name="sign_in">"Σύνδεση"</string>
-    <string name="menu_sign_out">"Αποσύνδεση"</string>
-    <string name="menu_settings">"Ρυθμίσεις"</string>
-    <string name="menu_sign_out_all">"Αποσύνδεση όλων"</string>
-    <string name="choose_account_title">"Συζήτηση - Επιλογή λογαριασμού"</string>
-    <string name="conversations">"(%1$d)"</string>
-    <string name="add_account">"Προσθήκη λογαριασμού <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
-    <string name="menu_view_contact_list">"Λίστα επαφών"</string>
-    <string name="signing_in_wait">"Σύνδεση..."</string>
 </resources>

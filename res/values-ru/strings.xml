@@ -19,19 +19,4 @@
     <string name="ro_perm_desc">"Позволяет приложениям считывать данные через поставщика чата."</string>
     <string name="wo_perm_label">"писать мгновенные сообщения"</string>
     <string name="wo_perm_desc">"Позволяет приложениям записывать данные через поставщика чата."</string>
-    <string name="im_label">"Чат"</string>
-    <string name="landing_page_title">"Чат – выберите аккаунт"</string>
-    <string name="menu_add_account">"Добавить аккаунт"</string>
-    <string name="menu_edit_account">"Изменить аккаунт"</string>
-    <string name="menu_remove_account">"Удалить аккаунт"</string>
-    <string name="sign_in">"Вход"</string>
-    <string name="menu_sign_out">"Выход"</string>
-    <string name="menu_settings">"Настройки"</string>
-    <string name="menu_sign_out_all">"Выйти отовсюду"</string>
-    <string name="choose_account_title">"Чат – выберите аккаунт"</string>
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
-    <string name="add_account">"Добавить аккаунт <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
-    <string name="menu_view_contact_list">"Список контактов"</string>
-    <string name="signing_in_wait">"Выполняется вход..."</string>
 </resources>

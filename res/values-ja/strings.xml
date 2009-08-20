@@ -19,18 +19,4 @@
     <string name="ro_perm_desc">"IMコンテンツプロバイダーからのデータ読み取りをアプリケーションに許可します。"</string>
     <string name="wo_perm_label">"インスタントメッセージを作成"</string>
     <string name="wo_perm_desc">"IMコンテンツプロバイダーからのデータ書き込みをアプリケーションに許可します。"</string>
-    <string name="im_label">"チャット"</string>
-    <string name="landing_page_title">"チャット: アカウントを選択"</string>
-    <string name="menu_add_account">"アカウントを追加"</string>
-    <string name="menu_edit_account">"アカウントを編集"</string>
-    <string name="menu_remove_account">"アカウントを削除"</string>
-    <string name="sign_in">"ログイン"</string>
-    <string name="menu_sign_out">"ログアウト"</string>
-    <string name="menu_settings">"設定"</string>
-    <string name="menu_sign_out_all">"すべてログアウト"</string>
-    <string name="choose_account_title">"チャット: アカウントを選択"</string>
-    <string name="conversations">"（%1$d）"</string>
-    <string name="add_account">"<xliff:g id="ACCOUNT">%1$s</xliff:g>アカウントを追加"</string>
-    <string name="menu_view_contact_list">"連絡先リスト"</string>
-    <string name="signing_in_wait">"ログイン中..."</string>
 </resources>

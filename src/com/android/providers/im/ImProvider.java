@@ -756,6 +756,8 @@ public class ImProvider extends ContentProvider {
                 "accounts.pw AS account_pw");
         sProviderAccountsProjectionMap.put(Im.Provider.ACTIVE_ACCOUNT_LOCKED,
                 "accounts.locked AS account_locked");
+        sProviderAccountsProjectionMap.put(Im.Provider.ACTIVE_ACCOUNT_KEEP_SIGNED_IN,
+                "accounts.keep_signed_in AS account_keepSignedIn");
         sProviderAccountsProjectionMap.put(Im.Provider.ACCOUNT_PRESENCE_STATUS,
                 "accountStatus.presenceStatus AS account_presenceStatus");
         sProviderAccountsProjectionMap.put(Im.Provider.ACCOUNT_CONNECTION_STATUS,
@@ -2849,6 +2851,12 @@ public class ImProvider extends ContentProvider {
                 tableToChange = TABLE_SESSION_COOKIES;
                 changedItemId = url.getPathSegments().get(2);
                 idColumnName = Im.SessionCookies.ACCOUNT;
+                break;
+
+            case MATCH_PROVIDER_SETTINGS_BY_ID:
+                tableToChange = TABLE_PROVIDER_SETTINGS;
+                changedItemId = url.getPathSegments().get(1);
+                idColumnName = Im.ProviderSettings.PROVIDER;
                 break;
 
             case MATCH_PROVIDER_SETTINGS_BY_ID_AND_NAME:

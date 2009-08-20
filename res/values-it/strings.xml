@@ -19,19 +19,4 @@
     <string name="ro_perm_desc">"Consente alle applicazioni di leggere dati del provider di contenuti IM."</string>
     <string name="wo_perm_label">"scrivere messaggi immediati"</string>
     <string name="wo_perm_desc">"Consente alle applicazioni di scrivere dati per il provider di contenuti IM."</string>
-    <string name="im_label">"Chat"</string>
-    <string name="landing_page_title">"Chat - Seleziona un account"</string>
-    <string name="menu_add_account">"Aggiungi account"</string>
-    <string name="menu_edit_account">"Modifica account"</string>
-    <string name="menu_remove_account">"Rimuovi account"</string>
-    <string name="sign_in">"Accedi"</string>
-    <string name="menu_sign_out">"Esci"</string>
-    <string name="menu_settings">"Impostazioni"</string>
-    <string name="menu_sign_out_all">"Esci da tutto"</string>
-    <string name="choose_account_title">"Chat - Seleziona un account"</string>
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
-    <string name="add_account">"Aggiungi account <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
-    <string name="menu_view_contact_list">"Elenco contatti"</string>
-    <string name="signing_in_wait">"Accesso..."</string>
 </resources>

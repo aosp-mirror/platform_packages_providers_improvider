@@ -19,19 +19,4 @@
     <string name="ro_perm_desc">"Toepassingen toestaan gegevens te lezen van de provider van chatinhoud."</string>
     <string name="wo_perm_label">"chatberichten schrijven"</string>
     <string name="wo_perm_desc">"Toepassingen toestaan gegevens te schrijven naar de provider van chatinhoud."</string>
-    <string name="im_label">"Chat"</string>
-    <string name="landing_page_title">"Chatten - Een account selecteren"</string>
-    <string name="menu_add_account">"Account toevoegen"</string>
-    <string name="menu_edit_account">"Account bewerken"</string>
-    <string name="menu_remove_account">"Account verwijderen"</string>
-    <string name="sign_in">"Aanmelden"</string>
-    <string name="menu_sign_out">"Afmelden"</string>
-    <string name="menu_settings">"Instellingen"</string>
-    <string name="menu_sign_out_all">"Overal afmelden"</string>
-    <string name="choose_account_title">"Chatten - Een account selecteren"</string>
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
-    <string name="add_account">"<xliff:g id="ACCOUNT">%1$s</xliff:g>-account toevoegen"</string>
-    <string name="menu_view_contact_list">"Lijst met contactpersonen"</string>
-    <string name="signing_in_wait">"Aanmelden..."</string>
 </resources>

@@ -19,18 +19,4 @@
     <string name="ro_perm_desc">"Tillader programmer at læse data fra IM-indholdsleverandøren."</string>
     <string name="wo_perm_label">"skriv chatbeskeder"</string>
     <string name="wo_perm_desc">"Tillader programmer at skrive data til IM-indholdsleverandøren."</string>
-    <string name="im_label">"IM"</string>
-    <string name="landing_page_title">"Chat – Vælg en konto"</string>
-    <string name="menu_add_account">"Tilføj konto"</string>
-    <string name="menu_edit_account">"Rediger konto"</string>
-    <string name="menu_remove_account">"Fjern konto"</string>
-    <string name="sign_in">"Log ind"</string>
-    <string name="menu_sign_out">"Log ud"</string>
-    <string name="menu_settings">"Indstillinger"</string>
-    <string name="menu_sign_out_all">"Log alle ud"</string>
-    <string name="choose_account_title">"Chat – Vælg en konto"</string>
-    <string name="conversations">"(%1$d)"</string>
-    <string name="add_account">"Tilføj <xliff:g id="ACCOUNT">%1$s</xliff:g>-konto"</string>
-    <string name="menu_view_contact_list">"Liste over kontaktpersoner"</string>
-    <string name="signing_in_wait">"Logger ind ..."</string>
 </resources>

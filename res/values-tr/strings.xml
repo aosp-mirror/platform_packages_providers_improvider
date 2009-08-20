@@ -19,18 +19,4 @@
     <string name="ro_perm_desc">"Uygulamalara, IM içerik sağlayıcısından gelen verileri okuma izni verir."</string>
     <string name="wo_perm_label">"anlık iletiler yazın"</string>
     <string name="wo_perm_desc">"Uygulamaların IM içerik sağlayıcısına veri yazmasına izin verir."</string>
-    <string name="im_label">"IM"</string>
-    <string name="landing_page_title">"Sohbet - Bir hesap seçin"</string>
-    <string name="menu_add_account">"Hesap ekle"</string>
-    <string name="menu_edit_account">"Hesabı düzenle"</string>
-    <string name="menu_remove_account">"Hesabı kaldır"</string>
-    <string name="sign_in">"Oturum aç"</string>
-    <string name="menu_sign_out">"Çıkış"</string>
-    <string name="menu_settings">"Ayarlar"</string>
-    <string name="menu_sign_out_all">"Tüm hizmetlerden çık"</string>
-    <string name="choose_account_title">"Sohbet - Bir hesap seçin"</string>
-    <string name="conversations">"(%1$d)"</string>
-    <string name="add_account">"<xliff:g id="ACCOUNT">%1$s</xliff:g> hesabını ekle"</string>
-    <string name="menu_view_contact_list">"Kişi listesi"</string>
-    <string name="signing_in_wait">"Oturum açılıyor..."</string>
 </resources>

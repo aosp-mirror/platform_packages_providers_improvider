@@ -19,19 +19,4 @@
     <string name="ro_perm_desc">"允許應用程式讀取來自即時訊息內容提供者的資料。"</string>
     <string name="wo_perm_label">"撰寫即時訊息"</string>
     <string name="wo_perm_desc">"允許應用程式將資料寫入即時訊息內容提供者。"</string>
-    <string name="im_label">"即時訊息"</string>
-    <string name="landing_page_title">"即時通訊 - 選取帳戶"</string>
-    <string name="menu_add_account">"新增帳戶"</string>
-    <string name="menu_edit_account">"編輯帳戶"</string>
-    <string name="menu_remove_account">"移除帳戶"</string>
-    <string name="sign_in">"登入"</string>
-    <string name="menu_sign_out">"登出"</string>
-    <string name="menu_settings">"設定"</string>
-    <string name="menu_sign_out_all">"全部登出"</string>
-    <string name="choose_account_title">"即時通訊 - 選取帳戶"</string>
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
-    <string name="add_account">"新增 <xliff:g id="ACCOUNT">%1$s</xliff:g> 帳戶"</string>
-    <string name="menu_view_contact_list">"聯絡人"</string>
-    <string name="signing_in_wait">"登入中…"</string>
 </resources>

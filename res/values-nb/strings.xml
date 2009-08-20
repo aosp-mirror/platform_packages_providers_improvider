@@ -23,25 +23,4 @@
     <skip />
     <!-- no translation found for wo_perm_desc (470416777693330370) -->
     <skip />
-    <string name="im_label">"Nettprat"</string>
-    <!-- no translation found for landing_page_title (2177721703095999384) -->
-    <skip />
-    <!-- no translation found for menu_add_account (4184762314855405486) -->
-    <skip />
-    <!-- no translation found for menu_edit_account (6585077522972888350) -->
-    <skip />
-    <!-- no translation found for menu_remove_account (8013513817623405880) -->
-    <skip />
-    <string name="sign_in">"Logg inn"</string>
-    <string name="menu_sign_out">"Logg ut"</string>
-    <string name="menu_settings">"Innstillinger"</string>
-    <!-- no translation found for menu_sign_out_all (945106187701517280) -->
-    <skip />
-    <!-- no translation found for choose_account_title (3179220583433723296) -->
-    <skip />
-    <!-- no translation found for conversations (6809253595345281731) -->
-    <skip />
-    <string name="add_account">"Legg til <xliff:g id="ACCOUNT">%1$s</xliff:g>-konto"</string>
-    <string name="menu_view_contact_list">"Kontaktliste"</string>
-    <string name="signing_in_wait">"Logger inn…"</string>
 </resources>
