@@ -78,7 +78,7 @@ public class ImProvider extends ContentProvider {
 
 
     private static final String DATABASE_NAME = "im.db";
-    private static final int DATABASE_VERSION = 51;
+    private static final int DATABASE_VERSION = 52;
 
     protected static final int MATCH_PROVIDERS = 1;
     protected static final int MATCH_PROVIDERS_BY_ID = 2;
@@ -449,8 +449,24 @@ public class ImProvider extends ContentProvider {
                         db.endTransaction();
                     }
 
-                    return;
+                case 51:
+                    if (newVersion <= 51) {
+                        return;
+                    }
 
+                    db.beginTransaction();
+                    try {
+                        db.execSQL(
+                                "ALTER TABLE " + TABLE_MESSAGES + " ADD COLUMN show_ts INTEGER;");
+                        db.setTransactionSuccessful();
+                    } catch (Throwable ex) {
+                        Log.e(LOG_TAG, ex.getMessage(), ex);
+                        break; // force to destroy all old data;
+                    } finally {
+                        db.endTransaction();
+                    }
+
+                    return;
             }
 
             Log.w(LOG_TAG, "Couldn't upgrade db to " + newVersion + ". Destroying old data.");
@@ -569,7 +585,8 @@ public class ImProvider extends ContentProvider {
                     "packet_id TEXT UNIQUE," +
                     "err_code INTEGER NOT NULL DEFAULT 0," +
                     "err_msg TEXT," +
-                    "is_muc INTEGER" +
+                    "is_muc INTEGER," +
+                    "show_ts INTEGER" +
                     ");");
 
             tableName = (tablePrefix != null) ? tablePrefix+TABLE_CHATS : TABLE_CHATS;
@@ -610,7 +627,8 @@ public class ImProvider extends ContentProvider {
                     "packet_id TEXT UNIQUE," +
                     "err_code INTEGER NOT NULL DEFAULT 0," +
                     "err_msg TEXT," +
-                    "is_muc INTEGER" +
+                    "is_muc INTEGER," +
+                    "show_ts INTEGER" +
                     ");");
 
         }
@@ -826,6 +844,7 @@ public class ImProvider extends ContentProvider {
         sMessagesProjectionMap.put(Im.Messages.ERROR_CODE, "messages.err_code AS err_code");
         sMessagesProjectionMap.put(Im.Messages.ERROR_MESSAGE, "messages.err_msg AS err_msg");
         sMessagesProjectionMap.put(Im.Messages.IS_GROUP_CHAT, "messages.is_muc AS is_muc");
+        sMessagesProjectionMap.put(Im.Messages.DISPLAY_SENT_TIME, "messages.show_ts AS show_ts");
         // contacts columns
         sMessagesProjectionMap.put(Im.Messages.CONTACT, "contacts.username AS contact");
         sMessagesProjectionMap.put(Im.Contacts.PROVIDER, "contacts.provider AS provider");
@@ -833,17 +852,30 @@ public class ImProvider extends ContentProvider {
         sMessagesProjectionMap.put("contact_type", "contacts.type AS contact_type");
 
         sInMemoryMessagesProjectionMap = new HashMap<String, String>();
-        sInMemoryMessagesProjectionMap.put(Im.Messages._ID, "inMemoryMessages._id AS _id");
-        sInMemoryMessagesProjectionMap.put(Im.Messages._COUNT, "COUNT(*) AS _count");
-        sInMemoryMessagesProjectionMap.put(Im.Messages.THREAD_ID, "inMemoryMessages.thread_id AS thread_id");
-        sInMemoryMessagesProjectionMap.put(Im.Messages.PACKET_ID, "inMemoryMessages.packet_id AS packet_id");
-        sInMemoryMessagesProjectionMap.put(Im.Messages.NICKNAME, "inMemoryMessages.nickname AS nickname");
-        sInMemoryMessagesProjectionMap.put(Im.Messages.BODY, "inMemoryMessages.body AS body");
-        sInMemoryMessagesProjectionMap.put(Im.Messages.DATE, "inMemoryMessages.date AS date");
-        sInMemoryMessagesProjectionMap.put(Im.Messages.TYPE, "inMemoryMessages.type AS type");
-        sInMemoryMessagesProjectionMap.put(Im.Messages.ERROR_CODE, "inMemoryMessages.err_code AS err_code");
-        sInMemoryMessagesProjectionMap.put(Im.Messages.ERROR_MESSAGE, "inMemoryMessages.err_msg AS err_msg");
-        sInMemoryMessagesProjectionMap.put(Im.Messages.IS_GROUP_CHAT, "inMemoryMessages.is_muc AS is_muc");
+        sInMemoryMessagesProjectionMap.put(Im.Messages._ID,
+                "inMemoryMessages._id AS _id");
+        sInMemoryMessagesProjectionMap.put(Im.Messages._COUNT,
+                "COUNT(*) AS _count");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.THREAD_ID,
+                "inMemoryMessages.thread_id AS thread_id");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.PACKET_ID,
+                "inMemoryMessages.packet_id AS packet_id");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.NICKNAME,
+                "inMemoryMessages.nickname AS nickname");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.BODY,
+                "inMemoryMessages.body AS body");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.DATE,
+                "inMemoryMessages.date AS date");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.TYPE,
+                "inMemoryMessages.type AS type");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.ERROR_CODE,
+                "inMemoryMessages.err_code AS err_code");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.ERROR_MESSAGE,
+                "inMemoryMessages.err_msg AS err_msg");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.IS_GROUP_CHAT,
+                "inMemoryMessages.is_muc AS is_muc");
+        sInMemoryMessagesProjectionMap.put(Im.Messages.DISPLAY_SENT_TIME,
+                "inMemoryMessages.show_ts AS show_ts");
         // contacts columns
         sInMemoryMessagesProjectionMap.put(Im.Messages.CONTACT, "contacts.username AS contact");
         sInMemoryMessagesProjectionMap.put(Im.Contacts.PROVIDER, "contacts.provider AS provider");
