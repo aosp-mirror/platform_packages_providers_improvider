@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.providers.im"
-        android:sharedUserId="android.uid.shared">
+        android:sharedUserId="com.google.uid.shared">
 
     <permission android:name="com.android.providers.im.permission.READ_ONLY"
         android:permissionGroup="android.permission-group.MESSAGES"
@@ -17,7 +17,7 @@
     <uses-permission android:name="com.android.providers.im.permission.READ_ONLY" />
     <uses-permission android:name="com.android.providers.im.permission.WRITE_ONLY" />
 
-    <application android:process="android.process.acore"
+    <application android:process="com.google.process.gapps"
             android:label="@string/im_label"
             android:icon="@drawable/ic_launcher_im"
             android:taskAffinity="android.task.im">

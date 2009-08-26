@@ -11,7 +11,7 @@ LOCAL_JAVA_LIBRARIES := ext \
                                                         # classes defined in this plugin package)
 
 LOCAL_PACKAGE_NAME := ImProvider
-LOCAL_CERTIFICATE := shared
+LOCAL_CERTIFICATE := vendor/google/certs/app
 
 include $(BUILD_PACKAGE)
 
