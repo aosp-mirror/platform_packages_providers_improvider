@@ -8,7 +8,7 @@ LOCAL_SRC_FILES :=  $(call all-java-files-under,src)
 LOCAL_JAVA_LIBRARIES := ext \
 
 LOCAL_PACKAGE_NAME := ImProvider
-LOCAL_CERTIFICATE := shared
+LOCAL_CERTIFICATE := vendor/google/certs/app
 
 include $(BUILD_PACKAGE)
 
