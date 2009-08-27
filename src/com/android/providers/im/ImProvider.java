@@ -1297,6 +1297,13 @@ public class ImProvider extends ContentProvider {
                 appendWhere(whereClause, Im.Chats.CONTACT_ID, "=", url.getPathSegments().get(1));
                 break;
 
+            case MATCH_CHATS_BY_ACCOUNT:
+                qb.setTables(TABLE_CHATS);
+                String accountStr = decodeURLSegment(url.getLastPathSegment());
+                appendWhere(whereClause, buildContactIdSelection(Im.Chats.CONTACT_ID,
+                        Im.Contacts.ACCOUNT + "='" + accountStr + "'"));
+                break;
+
             case MATCH_PRESENCE:
                 qb.setTables(TABLE_PRESENCE);
                 break;
