@@ -49,8 +49,6 @@ public class ImProvider extends ContentProvider {
 
     private static final String AUTHORITY = "im";
 
-    private static final boolean MAKE_MESSAGE_PRESENCE_CHAT_PERSISTENT = true;
-
     private static final String TABLE_ACCOUNTS = "accounts";
     private static final String TABLE_PROVIDERS = "providers";
     private static final String TABLE_PROVIDER_SETTINGS = "providerSettings";
@@ -252,7 +250,7 @@ public class ImProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
 
-            if (DBG) log("##### bootstrapDatabase");
+            if (DBG) log("DatabaseHelper.onCreate");
 
             db.execSQL("CREATE TABLE " + TABLE_PROVIDERS + " (" +
                     "_id INTEGER PRIMARY KEY," +
@@ -276,7 +274,7 @@ public class ImProvider extends ContentProvider {
                     ");");
 
             createContactsTables(db);
-            createMessageChatTables(db, null /* no table prefix */);
+            createMessageChatTables(db, true /* create show_ts column */);
 
             db.execSQL("CREATE TABLE " + TABLE_AVATARS + " (" +
                     "_id INTEGER PRIMARY KEY," +
@@ -414,18 +412,22 @@ public class ImProvider extends ContentProvider {
                         return;
                     }
 
-                    if (MAKE_MESSAGE_PRESENCE_CHAT_PERSISTENT) {
-                        db.beginTransaction();
-                        try {
-                            createMessageChatTables(db, null);
-                            db.setTransactionSuccessful();
-                        } catch (Throwable ex) {
-                            Log.e(LOG_TAG, ex.getMessage(), ex);
-                            break; // force to destroy all old data;
-                        } finally {
-                            db.endTransaction();
-                        }
+                    db.beginTransaction();
+                    try {
+                        // when upgrading from version 47, don't create the show_ts column
+                        // here. The upgrade step in 51 will add the show_ts column to the
+                        // messages table. If we created the messages table with show_ts here,
+                        // we'll get a duplicate column error later.
+                        createMessageChatTables(db, false /* don't create show_ts column */);
+                        db.setTransactionSuccessful();
+                    } catch (Throwable ex) {
+                        Log.e(LOG_TAG, ex.getMessage(), ex);
+                        break; // force to destroy all old data;
+                    } finally {
+                        db.endTransaction();
                     }
+
+                    // fall thru.
 
                 case 48:
                 case 49:
@@ -478,11 +480,14 @@ public class ImProvider extends ContentProvider {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROVIDERS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_ACCOUNTS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTACT_LIST);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_BLOCKED_LIST);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTACTS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTACTS_ETAG);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_AVATARS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROVIDER_SETTINGS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_BRANDING_RESOURCE_MAP_CACHE);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_MESSAGES);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_CHATS);
 
             // mcs/rmq stuff
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_OUTGOING_RMQ_MESSAGES);
@@ -491,6 +496,8 @@ public class ImProvider extends ContentProvider {
         }
 
         private void createContactsTables(SQLiteDatabase db) {
+            if (DBG) log("createContactsTables");
+
             StringBuilder buf = new StringBuilder();
             String contactsTableName = TABLE_CONTACTS;
 
@@ -569,48 +576,66 @@ public class ImProvider extends ContentProvider {
             db.execSQL(buf.toString());
         }
 
-        private void createMessageChatTables(SQLiteDatabase db, String tablePrefix) {
-            String tableName;
-
-            tableName = (tablePrefix != null) ? tablePrefix+TABLE_MESSAGES : TABLE_MESSAGES;
+        private void createMessageChatTables(SQLiteDatabase db,
+                                             boolean addShowTsColumnForMessagesTable) {
+            if (DBG) log("createMessageChatTables");
 
             // message table
-            db.execSQL("CREATE TABLE IF NOT EXISTS " + tableName + " (" +
-                    "_id INTEGER PRIMARY KEY," +
-                    "thread_id INTEGER," +
-                    "nickname TEXT," +
-                    "body TEXT," +
-                    "date INTEGER," +    // in millisec
-                    "type INTEGER," +
-                    "packet_id TEXT UNIQUE," +
-                    "err_code INTEGER NOT NULL DEFAULT 0," +
-                    "err_msg TEXT," +
-                    "is_muc INTEGER," +
-                    "show_ts INTEGER" +
-                    ");");
+            StringBuilder buf = new StringBuilder();
+            buf.append("CREATE TABLE IF NOT EXISTS ");
+            buf.append(TABLE_MESSAGES);
+            buf.append(" (_id INTEGER PRIMARY KEY,");
+            buf.append("thread_id INTEGER,");
+            buf.append("nickname TEXT,");
+            buf.append("body TEXT,");
+            buf.append("date INTEGER,");
+            buf.append("type INTEGER,");
+            buf.append("packet_id TEXT UNIQUE,");
+            buf.append("err_code INTEGER NOT NULL DEFAULT 0,");
+            buf.append("err_msg TEXT,");
+            buf.append("is_muc INTEGER");
 
-            tableName = (tablePrefix != null) ? tablePrefix+TABLE_CHATS : TABLE_CHATS;
+            if (addShowTsColumnForMessagesTable) {
+                buf.append(",show_ts INTEGER");
+            }
+
+            buf.append(");");
+
+            String sqlStatement = buf.toString();
+
+            if (DBG) log("create message table: " + sqlStatement);
+            db.execSQL(sqlStatement);
+
+            buf.delete(0, buf.length());
+            buf.append("CREATE TABLE IF NOT EXISTS ");
+            buf.append(TABLE_CHATS);
+            buf.append(" (_id INTEGER PRIMARY KEY,");
+            buf.append("contact_id INTEGER UNIQUE,");
+            buf.append("jid_resource TEXT,"); // the JID resource for the user, for non-group chats
+            buf.append("groupchat INTEGER,"); // 1 if group chat, 0 if not TODO: remove this column
+            buf.append("last_unread_message TEXT,"); // the last unread message
+            buf.append("last_message_date INTEGER,"); // in seconds
+            buf.append("unsent_composed_message TEXT,"); // a composed, but not sent message
+            buf.append("shortcut INTEGER);"); // which of 10 slots (if any) this chat occupies
 
             // chat sessions, including single person chats and group chats
-            db.execSQL("CREATE TABLE IF NOT EXISTS " + tableName + " ("+
-                    "_id INTEGER PRIMARY KEY," +
-                    "contact_id INTEGER UNIQUE," +
-                    "jid_resource TEXT," +  // the JID resource for the user, only for non-group chats
-                    "groupchat INTEGER," +   // 1 if group chat, 0 if not TODO: remove this column
-                    "last_unread_message TEXT," +  // the last unread message
-                    "last_message_date INTEGER," +  // in seconds
-                    "unsent_composed_message TEXT," + // a composed, but not sent message
-                    "shortcut INTEGER" + // which of 10 slots (if any) this chat occupies
-                    ");");
+            sqlStatement = buf.toString();
 
-            if (MAKE_MESSAGE_PRESENCE_CHAT_PERSISTENT) {
-                db.execSQL("CREATE TRIGGER IF NOT EXISTS contact_cleanup " +
-                        "DELETE ON contacts " +
-                        "BEGIN " +
-                        "DELETE FROM " + TABLE_CHATS + " WHERE contact_id = OLD._id;" +
-                        "DELETE FROM " + TABLE_MESSAGES + " WHERE thread_id = OLD._id;" +
-                        "END");
-            }
+            if (DBG) log("create chat table: " + sqlStatement);
+            db.execSQL(sqlStatement);
+
+            buf.delete(0, buf.length());
+            buf.append("CREATE TRIGGER IF NOT EXISTS contact_cleanup ");
+            buf.append("DELETE ON contacts ");
+            buf.append("BEGIN ");
+            buf.append("DELETE FROM ").append(TABLE_CHATS).append(" WHERE contact_id = OLD._id;");
+            buf.append("DELETE FROM ").append(TABLE_MESSAGES).append(" WHERE thread_id = OLD._id;");
+            buf.append("END");
+
+            sqlStatement = buf.toString();
+
+            if (DBG) log("create trigger: " + sqlStatement);
+            db.execSQL(sqlStatement);
         }
 
         private void createInMemoryMessageTables(SQLiteDatabase db, String tablePrefix) {
@@ -647,10 +672,6 @@ public class ImProvider extends ContentProvider {
             String cpDbName;
             db.execSQL("ATTACH DATABASE ':memory:' AS " + mTransientDbName + ";");
             cpDbName = mTransientDbName + ".";
-
-            if (!MAKE_MESSAGE_PRESENCE_CHAT_PERSISTENT) {
-                createMessageChatTables(db, cpDbName);
-            }
 
             // in-memory message table
             createInMemoryMessageTables(db, cpDbName);
