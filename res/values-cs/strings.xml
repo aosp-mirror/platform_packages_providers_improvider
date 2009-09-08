@@ -15,8 +15,10 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ro_perm_label">"číst zprávy chatu"</string>
-    <string name="ro_perm_desc">"Povoluje aplikacím číst data z poskytovatele obsahu chatu."</string>
-    <string name="wo_perm_label">"chatovat"</string>
-    <string name="wo_perm_desc">"Povoluje aplikacím zapisovat data do poskytovatele obsahu chatových zpráv."</string>
+    <string name="ro_perm_label" msgid="8923213594676670163">"číst zprávy chatu"</string>
+    <string name="ro_perm_desc" msgid="6154703403388711809">"Povoluje aplikacím číst data z poskytovatele obsahu chatu."</string>
+    <string name="wo_perm_label" msgid="4771652386754813294">"chatovat"</string>
+    <string name="wo_perm_desc" msgid="470416777693330370">"Povoluje aplikacím zapisovat data do poskytovatele obsahu chatových zpráv."</string>
+    <!-- no translation found for app_label (1767858328304473363) -->
+    <skip />
 </resources>

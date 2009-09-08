@@ -15,8 +15,10 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ro_perm_label">"anlık iletileri oku"</string>
-    <string name="ro_perm_desc">"Uygulamalara, IM içerik sağlayıcısından gelen verileri okuma izni verir."</string>
-    <string name="wo_perm_label">"anlık iletiler yazın"</string>
-    <string name="wo_perm_desc">"Uygulamaların IM içerik sağlayıcısına veri yazmasına izin verir."</string>
+    <string name="ro_perm_label" msgid="8923213594676670163">"anlık iletileri oku"</string>
+    <string name="ro_perm_desc" msgid="6154703403388711809">"Uygulamalara, IM içerik sağlayıcısından gelen verileri okuma izni verir."</string>
+    <string name="wo_perm_label" msgid="4771652386754813294">"anlık iletiler yazın"</string>
+    <string name="wo_perm_desc" msgid="470416777693330370">"Uygulamaların IM içerik sağlayıcısına veri yazmasına izin verir."</string>
+    <!-- no translation found for app_label (1767858328304473363) -->
+    <skip />
 </resources>

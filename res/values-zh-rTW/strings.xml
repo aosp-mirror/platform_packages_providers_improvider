@@ -15,8 +15,10 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ro_perm_label">"讀取即時訊息"</string>
-    <string name="ro_perm_desc">"允許應用程式讀取來自即時訊息內容提供者的資料。"</string>
-    <string name="wo_perm_label">"撰寫即時訊息"</string>
-    <string name="wo_perm_desc">"允許應用程式將資料寫入即時訊息內容提供者。"</string>
+    <string name="ro_perm_label" msgid="8923213594676670163">"讀取即時訊息"</string>
+    <string name="ro_perm_desc" msgid="6154703403388711809">"允許應用程式讀取來自即時訊息內容提供者的資料。"</string>
+    <string name="wo_perm_label" msgid="4771652386754813294">"撰寫即時訊息"</string>
+    <string name="wo_perm_desc" msgid="470416777693330370">"允許應用程式將資料寫入即時訊息內容提供者。"</string>
+    <!-- no translation found for app_label (1767858328304473363) -->
+    <skip />
 </resources>

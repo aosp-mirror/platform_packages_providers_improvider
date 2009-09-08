@@ -15,8 +15,10 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ro_perm_label">"ler mensagens instantâneas"</string>
-    <string name="ro_perm_desc">"Permite que os aplicativos leiam os dados do provedor de conteúdo de mensagem instantânea."</string>
-    <string name="wo_perm_label">"gravar mensagens instantâneas"</string>
-    <string name="wo_perm_desc">"Permite que os aplicativos gravem os dados no provedor de conteúdo de mensagem instantânea."</string>
+    <string name="ro_perm_label" msgid="8923213594676670163">"ler mensagens instantâneas"</string>
+    <string name="ro_perm_desc" msgid="6154703403388711809">"Permite que os aplicativos leiam os dados do provedor de conteúdo de mensagem instantânea."</string>
+    <string name="wo_perm_label" msgid="4771652386754813294">"gravar mensagens instantâneas"</string>
+    <string name="wo_perm_desc" msgid="470416777693330370">"Permite que os aplicativos gravem os dados no provedor de conteúdo de mensagem instantânea."</string>
+    <!-- no translation found for app_label (1767858328304473363) -->
+    <skip />
 </resources>
