@@ -19,6 +19,5 @@
     <string name="ro_perm_desc" msgid="6154703403388711809">"IMコンテンツプロバイダーからのデータ読み取りをアプリケーションに許可します。"</string>
     <string name="wo_perm_label" msgid="4771652386754813294">"インスタントメッセージを作成"</string>
     <string name="wo_perm_desc" msgid="470416777693330370">"IMコンテンツプロバイダーからのデータ書き込みをアプリケーションに許可します。"</string>
-    <!-- no translation found for app_label (1767858328304473363) -->
-    <skip />
+    <string name="app_label" msgid="1767858328304473363">"IMストレージ"</string>
 </resources>

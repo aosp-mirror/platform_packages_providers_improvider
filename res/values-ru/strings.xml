@@ -19,6 +19,5 @@
     <string name="ro_perm_desc" msgid="6154703403388711809">"Позволяет приложениям считывать данные через поставщика чата."</string>
     <string name="wo_perm_label" msgid="4771652386754813294">"писать мгновенные сообщения"</string>
     <string name="wo_perm_desc" msgid="470416777693330370">"Позволяет приложениям записывать данные через поставщика чата."</string>
-    <!-- no translation found for app_label (1767858328304473363) -->
-    <skip />
+    <string name="app_label" msgid="1767858328304473363">"Память мобильных сообщений"</string>
 </resources>

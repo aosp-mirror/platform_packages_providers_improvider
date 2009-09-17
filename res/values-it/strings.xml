@@ -19,6 +19,5 @@
     <string name="ro_perm_desc" msgid="6154703403388711809">"Consente alle applicazioni di leggere dati del provider di contenuti IM."</string>
     <string name="wo_perm_label" msgid="4771652386754813294">"scrivere messaggi immediati"</string>
     <string name="wo_perm_desc" msgid="470416777693330370">"Consente alle applicazioni di scrivere dati per il provider di contenuti IM."</string>
-    <!-- no translation found for app_label (1767858328304473363) -->
-    <skip />
+    <string name="app_label" msgid="1767858328304473363">"Memoria IM"</string>
 </resources>

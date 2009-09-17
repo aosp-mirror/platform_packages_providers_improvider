@@ -19,6 +19,5 @@
     <string name="ro_perm_desc" msgid="6154703403388711809">"Ermöglicht Anwendungen das Lesen von Daten des IM-Content-Providers."</string>
     <string name="wo_perm_label" msgid="4771652386754813294">"Chat-Nachrichten verfassen"</string>
     <string name="wo_perm_desc" msgid="470416777693330370">"Ermöglicht Anwendungen das Schreiben von Daten an den IM-Content-Provider."</string>
-    <!-- no translation found for app_label (1767858328304473363) -->
-    <skip />
+    <string name="app_label" msgid="1767858328304473363">"IM-Speicher"</string>
 </resources>
