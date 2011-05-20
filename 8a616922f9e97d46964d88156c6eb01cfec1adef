@@ -1,0 +1,8 @@
+Change-Id: I8a616922f9e97d46964d88156c6eb01cfec1adef
+Verified+1: Jean-Baptiste Queru <jbq@google.com>
+Code-Review+2: Joe Onorato <joeo@android.com>
+Submitted-by: Jean-Baptiste Queru <jbq@google.com>
+Submitted-at: Thu, 03 Sep 2009 14:22:28 -0700
+Reviewed-on: https://review.source.android.com/11619
+Project: platform/packages/providers/ImProvider
+Branch: refs/heads/donut
